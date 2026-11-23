@@ -5,12 +5,14 @@ description = "Daily wholesale price forecasts for West Bengal tomato and onion 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "altair>=6.3.0",
     "lightgbm>=4.7.0",
     "numpy>=2.5.5",
     "pandas>=3.1.1",
     "pandera[pandas]>=0.36.0",
     "psycopg[binary]>=3.2",
     "python-dotenv>=1.0",
+    "streamlit>=1.67.0",
 ]
 
 [dependency-groups]
@@ -33,6 +35,11 @@ extend-exclude = ["research"]
 [tool.ruff.lint]
 # E/W pycodestyle, F pyflakes, I import order, B bugbear (likely bugs), UP modern syntax.
 select = ["E", "W", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# The dashboard adds src/ to sys.path before importing the project (Streamlit Community Cloud does not install
+# the package), so its imports cannot all be at the top of the file.
+"dashboard/app.py" = ["E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

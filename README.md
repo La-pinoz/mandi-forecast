@@ -13,7 +13,8 @@ ingest + 7-day recheck on GitHub Actions) built and run by hand; waiting for its
 M07 (rolling-origin backtest harness; baseline results in `docs/backtest_report.md`) done. M08 (global
 LightGBM, backtest only) done: it does **not** beat the naive baseline (`docs/backtest_report.md`,
 `docs/model_card.md`). M09 (LightGBM in the daily run, model registry, settled scoring) built; the champion
-`lgbm.v1` is registered on Neon; waiting for the first scheduled run with it.
+`lgbm.v1` is registered on Neon; waiting for the first scheduled run with it. M10 (Streamlit dashboard) built; public
+deployment pending (see **Dashboard** below).
 
 ## Setup
 
@@ -43,6 +44,7 @@ uv run python -m mandi.models.daily_forecast    # baselines + champion LightGBM,
 uv run python -m mandi.evaluate.scoring         # provisional scores; settled once a target is > 7 days old
 uv run python -m mandi.evaluate.backtest        # baseline backtest on the latest history; prints report tables
 uv run python -m mandi.evaluate.backtest_lgbm   # LightGBM backtest + error analysis (~15-25 min); prints tables
+uv run streamlit run dashboard/app.py         # dashboard on http://localhost:8501 (reads DATABASE_URL, read-only)
 ```
 
 Re-running any of these adds nothing that is already stored. A second forecast run on the same IST day adds
@@ -63,6 +65,21 @@ off after 60 days without repository activity.
 Database tests run only when `TEST_DATABASE_URL` is set. Each test creates and drops its own temporary
 schema, so it never touches existing tables. In CI they run against a throwaway PostgreSQL 18 container
 (the same major version as Neon).
+
+## Dashboard
+
+`dashboard/app.py` (Streamlit) shows the live scorecard (provisional and settled, every metric with its n,
+losing rows included), rolling performance, the latest forecasts per series, data health and
+[`docs/incidents.md`](docs/incidents.md). Until M12 it reads PostgreSQL directly, over a read-only connection.
+
+**The first load may be slow.** A Streamlit Community Cloud app sleeps when nobody has opened it for a while,
+and Neon suspends the database after 5 idle minutes; both have to wake up. Later loads use a 10-minute cache.
+
+Deploying on [Streamlit Community Cloud](https://share.streamlit.io) (done by the owner, from the GitHub repo):
+
+1. *Create app* → this repository, branch `main`, main file `dashboard/app.py`.
+2. *Advanced settings*: Python 3.13; in *Secrets* add `DATABASE_URL = "<Neon direct URL>"`.
+3. Cloud installs `dashboard/requirements.txt` (keep its versions in step with `uv.lock`).
 
 ## Database
 
@@ -87,4 +104,4 @@ Schema changes are plain numbered SQL files in `sql/migrations/`, applied in ord
 ## Secrets
 
 `DATA_GOV_IN_API_KEY` and `DATABASE_URL` live in a local `.env` (git-ignored) and as GitHub Actions
-secrets. They are never committed or printed.
+secrets. `DATABASE_URL` is also a Streamlit Community Cloud secret for the dashboard. They are never committed or printed.

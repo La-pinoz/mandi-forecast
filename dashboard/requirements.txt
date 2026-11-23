@@ -1,0 +1,11 @@
+# Installed by Streamlit Community Cloud for dashboard/app.py (a requirements file next to the entrypoint takes
+# precedence over files in the repository root). Same packages and versions as pyproject.toml / uv.lock; keep
+# them in step when either changes. The project itself is not installed: app.py imports it from src/.
+altair==6.3.0
+lightgbm==4.7.0
+numpy==2.5.5
+pandas==3.1.1
+pandera[pandas]==0.36.0
+psycopg[binary]==3.3.9
+python-dotenv==1.2.4
+streamlit==1.67.0
