@@ -10,7 +10,7 @@ built, with the reasons, is in one document per milestone in `docs/`.
 database as price vintages) and M04 (validation: quarantine, anomaly flags, day status) done. M05 (daily
 ingest + 7-day recheck on GitHub Actions) built and run by hand; waiting for its first scheduled run. M06
 (naive and seasonal-naive live forecasts, provisional scoring) built and run by hand: the live record starts.
-No LightGBM yet.
+M07 (rolling-origin backtest harness; baseline results in `docs/backtest_report.md`) done. No LightGBM yet.
 
 ## Setup
 
@@ -37,6 +37,7 @@ uv run python -m mandi.ingest.ogd recheck       # fetch the 7 dates before those
 uv run python -m mandi.ingest.ogd backfill --start 2026-11-01 --end 2026-11-07
 uv run python -m mandi.models.daily_forecast    # baseline forecasts, horizons 1-7, cutoff = now (IST)
 uv run python -m mandi.evaluate.scoring         # provisional scores for targets with a reported price
+uv run python -m mandi.evaluate.backtest        # baseline backtest on the latest history; prints report tables
 ```
 
 Re-running any of these adds nothing that is already stored. A second forecast run on the same IST day adds
