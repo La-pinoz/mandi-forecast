@@ -35,9 +35,6 @@ class Observation:
     def key(self) -> tuple[str, str, str, str, str, date]:
         return (self.source, self.market, self.commodity, self.variety, self.grade, self.arrival_date)
 
-    def prices(self) -> tuple[Decimal, Decimal, Decimal]:
-        return (self.min_price, self.max_price, self.modal_price)
-
 
 def canonical_market_name(market_as_received: str) -> str:
     """Remove a trailing " APMC": West Bengal markets were renamed `X` -> `X APMC` on 01-05/11/2025, with
@@ -73,25 +70,3 @@ def parse_record(record: dict, source: str) -> Observation:
         max_price=parse_price(record["Max_Price"]),
         modal_price=parse_price(record["Modal_Price"]),
     )
-
-
-def split_duplicates(observations: list[Observation]) -> tuple[list[Observation], list[tuple]]:
-    """Return (one observation per key, keys whose rows disagree on price).
-
-    Rows of one key with identical prices are one observation; the first row is kept (this happens on the
-    rename-overlap days, where `X` and `X APMC` both appear). If the prices differ, no row of that key is
-    returned, because we can't tell which is right; the caller decides what to do with those keys.
-    """
-    rows_by_key: dict[tuple, list[Observation]] = {}
-    for observation in observations:
-        rows_by_key.setdefault(observation.key(), []).append(observation)
-
-    unique = []
-    conflicting_keys = []
-    for key, rows in rows_by_key.items():
-        distinct_prices = {row.prices() for row in rows}
-        if len(distinct_prices) == 1:
-            unique.append(rows[0])
-        else:
-            conflicting_keys.append(key)
-    return unique, conflicting_keys

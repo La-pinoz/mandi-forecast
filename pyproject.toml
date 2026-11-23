@@ -5,6 +5,8 @@ description = "Daily wholesale price forecasts for West Bengal tomato and onion 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "pandas>=3.1.1",
+    "pandera[pandas]>=0.36.0",
     "psycopg[binary]>=3.2",
     "python-dotenv>=1.0",
 ]

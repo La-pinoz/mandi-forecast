@@ -6,8 +6,9 @@ series (data from data.gov.in), evaluated honestly against observed prices.
 The plan is in `03-mandi-blueprint-v2.md`; milestone tasks are in `Milestone/`; what has actually been
 built, with the reasons, is in one document per milestone in `docs/`.
 
-**Status:** M01 (data experiment, go), M02 (repo, CI, database schema) and M03 (history loaded into the
-database as price vintages) done. No daily ingestion, validation or modelling yet.
+**Status:** M01 (data experiment, go), M02 (repo, CI, database schema), M03 (history loaded into the
+database as price vintages) and M04 (validation: quarantine, anomaly flags, day status) done. No daily
+ingestion or modelling yet.
 
 ## Setup
 
@@ -27,6 +28,8 @@ uv run ruff format .                    # format
 uv run pytest -rs                       # tests (-rs lists skipped tests and why)
 uv run python -m mandi.store.migrate    # apply new SQL migrations to DATABASE_URL
 uv run python -m mandi.ingest.load_m01_files   # load the saved M01 history files (re-running adds nothing)
+uv run python -m mandi.validate.replay         # re-validate every stored raw snapshot, then print the report
+uv run python -m mandi.validate.report         # print the data-quality report only
 ```
 
 Database tests run only when `TEST_DATABASE_URL` is set. Each test creates and drops its own temporary

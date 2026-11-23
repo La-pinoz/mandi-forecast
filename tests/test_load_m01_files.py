@@ -5,7 +5,7 @@ temporary folder, so each expected count can be worked out by reading the test.
 """
 
 import json
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -64,7 +64,7 @@ def history_dir(tmp_path: Path) -> Path:
             record("Barasat", "Tomato", "Other", "FAQ", ("2800", "3200", "3000"), "01/11/2025"),
             # Rename-overlap duplicate with identical prices (numbers this time): collapsed into one.
             record("Barasat APMC", "Tomato", "Other", "FAQ", (2800, 3200, 3000), "01/11/2025"),
-            # Conflicting rows for a tracked key: neither is loaded.
+            # Conflicting rows for a tracked key: both quarantined, neither loaded.
             record("Habra", "Tomato", "Other", "FAQ", ("1700", "1900", "1800"), "01/11/2025"),
             record("Habra", "Tomato", "Other", "FAQ", ("1800", "2000", "1900"), "01/11/2025"),
             # Not a shortlisted market: kept in raw_snapshots only.
@@ -97,11 +97,19 @@ def test_first_load_stores_snapshots_series_and_vintages(schema_conn, history_di
     assert summary.files_skipped == 0
     assert summary.tracked_records == 5  # Barasat x2, Habra x2, Asansol FAQ
     assert summary.duplicate_rows_collapsed == 1
-    assert summary.conflicting_keys == [
-        (VARIETY_WISE_SOURCE, "Habra", "Tomato", "Other", "FAQ", date(2025, 11, 1))
-    ]
+    assert summary.rows_quarantined == 2
     assert summary.vintages_added == 2
     assert summary.prices_current_changed == 2
+    # Barasat tomato and Asansol onion: one reported day each. Habra has no usable day, so no status rows.
+    assert summary.day_status_changed == 2
+
+    quarantined = schema_conn.execute(
+        "SELECT record ->> 'Market', record ->> 'Modal_Price', reason_code, run_id FROM quarantine ORDER BY 2"
+    ).fetchall()
+    assert quarantined == [
+        ("Habra", "1800", "conflicting_duplicate", run_id),
+        ("Habra", "1900", "conflicting_duplicate", run_id),
+    ]
 
     assert count(schema_conn, "raw_snapshots") == 3
     assert count(schema_conn, "series") == len(SHORTLIST)
@@ -126,11 +134,19 @@ def test_first_load_stores_snapshots_series_and_vintages(schema_conn, history_di
         "SELECT job_type, status, rows_in, rows_out, finished_at IS NOT NULL FROM pipeline_runs"
     ).fetchone()
     assert run == ("backfill_m01_files", "succeeded", 5, 2, True)
+    assert schema_conn.execute("SELECT rows_quarantined FROM pipeline_runs").fetchone() == (2,)
 
 
 def test_rerun_adds_nothing(schema_conn, history_dir):
     load_history(schema_conn, history_dir)
-    tables = ["raw_snapshots", "series", "price_vintages", "prices_current"]
+    tables = [
+        "raw_snapshots",
+        "series",
+        "price_vintages",
+        "prices_current",
+        "quarantine",
+        "series_day_status",
+    ]
     before = {table: count(schema_conn, table) for table in tables}
 
     second_run_id, summary = load_history(schema_conn, history_dir)

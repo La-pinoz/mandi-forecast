@@ -11,9 +11,9 @@ Flow (one pipeline_runs row per run):
 2. For each file, in its own transaction:
    a. skip it if an earlier run already stored it (same payload hash and same fetch time);
    b. store the response in raw_snapshots, with ingested_at = the file's fetched_at_ist;
-   c. parse the records of the shortlisted series, set aside keys whose rows disagree, and record vintages
-      with first_seen_at = fetched_at_ist.
-3. Refresh prices_current from price_vintages, then mark the run succeeded.
+   c. validate the records of the shortlisted series (`process_snapshot`, M04): contract failures go to
+      quarantine, passing observations become vintages with first_seen_at = fetched_at_ist.
+3. Refresh prices_current and series_day_status, then mark the run succeeded.
 
 A crash leaves every finished file committed and the run marked failed; running again skips those files.
 
@@ -22,18 +22,20 @@ values first published on each date.
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
 import psycopg
 from dotenv import load_dotenv
 
-from mandi.ingest.records import VARIETY_WISE_SOURCE, canonical_market_name, parse_record, split_duplicates
+from mandi.ingest.records import VARIETY_WISE_SOURCE
+from mandi.ingest.snapshot import process_snapshot, tracked_series_keys
 from mandi.store.db import get_connection
 from mandi.store.raw_snapshots import payload_hash, save_raw_snapshot
 from mandi.store.runs import finish_run, start_run
-from mandi.store.vintages import record_vintages, refresh_prices_current
+from mandi.store.vintages import refresh_prices_current
+from mandi.validate.day_status import refresh_series_day_status
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 HISTORY_DIR = PROJECT_ROOT / "data" / "raw" / "ogd_history" / "West Bengal"
@@ -59,12 +61,10 @@ class LoadSummary:
     files_skipped: int = 0
     tracked_records: int = 0
     duplicate_rows_collapsed: int = 0
-    # Keys with two rows that disagree on price. Not loaded; M04's rules decide what happens to them.
-    conflicting_keys: list[tuple] = field(default_factory=list)
-    # (file name, error) for tracked records whose price or date couldn't be parsed. Not loaded.
-    unparseable_records: list[tuple[str, str]] = field(default_factory=list)
+    rows_quarantined: int = 0
     vintages_added: int = 0
     prices_current_changed: int = 0
+    day_status_changed: int = 0
 
 
 def add_shortlisted_series(conn: psycopg.Connection) -> None:
@@ -78,14 +78,6 @@ def add_shortlisted_series(conn: psycopg.Connection) -> None:
             """,
             [(VARIETY_WISE_SOURCE, *series) for series in SHORTLIST],
         )
-
-
-def tracked_series_keys(conn: psycopg.Connection) -> set[tuple[str, str, str, str, str]]:
-    """(source, market, commodity, variety, grade) of every active series."""
-    rows = conn.execute(
-        "SELECT source, market, commodity, variety, grade FROM series WHERE is_active"
-    ).fetchall()
-    return set(rows)
 
 
 def stored_snapshots(conn: psycopg.Connection) -> set[tuple[str, datetime]]:
@@ -102,7 +94,7 @@ def load_file(
     already_stored: set[tuple[str, datetime]],
     summary: LoadSummary,
 ) -> None:
-    """Store one M01 file as a raw snapshot and its tracked observations as vintages (not committed)."""
+    """Store one M01 file as a raw snapshot, then validate it and store its outcome (not committed)."""
     content = json.loads(path.read_text(encoding="utf-8"))
     source = content["resource_id"]
     fetched_at = datetime.fromisoformat(content["fetched_at_ist"])
@@ -121,31 +113,11 @@ def load_file(
         return
     save_raw_snapshot(conn, run_id, source, content["request_params"], payload, fetched_at)
 
-    observations = []
-    for record in content["records"]:
-        series_key = (
-            source,
-            canonical_market_name(record["Market"]),
-            record["Commodity"],
-            record["Variety"],
-            record["Grade"],
-        )
-        if series_key not in tracked:
-            continue
-        summary.tracked_records += 1
-        try:
-            observations.append(parse_record(record, source))
-        except ValueError as error:
-            summary.unparseable_records.append((path.name, str(error)))
-
-    unique, conflicting_keys = split_duplicates(observations)
-    rows_in_conflicts = 0
-    for observation in observations:
-        if observation.key() in conflicting_keys:
-            rows_in_conflicts += 1
-    summary.duplicate_rows_collapsed += len(observations) - len(unique) - rows_in_conflicts
-    summary.conflicting_keys.extend(conflicting_keys)
-    summary.vintages_added += record_vintages(conn, unique, first_seen_at=fetched_at, run_id=run_id)
+    result = process_snapshot(conn, run_id, source, content["records"], fetched_at, tracked)
+    summary.tracked_records += result.tracked_records
+    summary.duplicate_rows_collapsed += result.duplicate_rows_collapsed
+    summary.rows_quarantined += result.rows_quarantined
+    summary.vintages_added += result.vintages_added
     summary.files_loaded += 1
 
 
@@ -169,6 +141,7 @@ def load_history(conn: psycopg.Connection, history_dir: Path = HISTORY_DIR) -> t
             load_file(conn, run_id, path, tracked, already_stored, summary)
             conn.commit()
         summary.prices_current_changed = refresh_prices_current(conn)
+        summary.day_status_changed = refresh_series_day_status(conn)
         conn.commit()
     except Exception as error:
         conn.rollback()
@@ -178,11 +151,19 @@ def load_history(conn: psycopg.Connection, history_dir: Path = HISTORY_DIR) -> t
             "failed",
             rows_in=summary.tracked_records,
             rows_out=summary.vintages_added,
+            rows_quarantined=summary.rows_quarantined,
             error_message=f"{type(error).__name__}: {error}",
         )
         raise
 
-    finish_run(conn, run_id, "succeeded", rows_in=summary.tracked_records, rows_out=summary.vintages_added)
+    finish_run(
+        conn,
+        run_id,
+        "succeeded",
+        rows_in=summary.tracked_records,
+        rows_out=summary.vintages_added,
+        rows_quarantined=summary.rows_quarantined,
+    )
     return run_id, summary
 
 
@@ -195,15 +176,10 @@ def main() -> None:
     print(f"Files loaded: {summary.files_loaded}; already loaded, skipped: {summary.files_skipped}")
     print(f"Records of shortlisted series: {summary.tracked_records}")
     print(f"Duplicate rows with identical prices, collapsed: {summary.duplicate_rows_collapsed}")
-    print(f"Unparseable records, not loaded: {len(summary.unparseable_records)}")
-    for file_name, error in summary.unparseable_records:
-        print(f"  {file_name}: {error}")
-    print(f"Keys with conflicting rows, not loaded (left for M04): {len(summary.conflicting_keys)}")
-    for key in summary.conflicting_keys:
-        _source, market, commodity, variety, grade, arrival_date = key
-        print(f"  {arrival_date} {market} / {commodity} / {variety} / {grade}")
+    print(f"Rows quarantined (one per record and failed rule): {summary.rows_quarantined}")
     print(f"Vintages added: {summary.vintages_added}")
     print(f"prices_current rows inserted or changed: {summary.prices_current_changed}")
+    print(f"series_day_status rows inserted or changed: {summary.day_status_changed}")
 
 
 if __name__ == "__main__":

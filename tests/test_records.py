@@ -10,7 +10,6 @@ from mandi.ingest.records import (
     canonical_market_name,
     parse_price,
     parse_record,
-    split_duplicates,
 )
 
 RECORD = {
@@ -68,32 +67,14 @@ def test_parse_record_uses_canonical_market_and_keeps_name_as_received():
     assert observation.market == "Barasat"
     assert observation.market_as_received == "Barasat APMC"
     assert observation.arrival_date == date(2026, 11, 21)
-    assert observation.prices() == (Decimal("1800"), Decimal("2200"), Decimal("2000"))
+    assert (observation.min_price, observation.max_price, observation.modal_price) == (
+        Decimal("1800"),
+        Decimal("2200"),
+        Decimal("2000"),
+    )
     assert observation.key() == (VARIETY_WISE_SOURCE, "Barasat", "Tomato", "Other", "FAQ", date(2026, 11, 21))
 
 
 def test_parse_record_rejects_a_bad_date():
     with pytest.raises(ValueError):
         parse_record({**RECORD, "Arrival_Date": "2026-11-21"}, VARIETY_WISE_SOURCE)
-
-
-def test_identical_duplicates_collapse_to_the_first_row():
-    # Rename-overlap day: the same market under both names, same prices.
-    old_name = parse_record({**RECORD, "Market": "Barasat"}, VARIETY_WISE_SOURCE)
-    new_name = parse_record({**RECORD, "Max_Price": "2200.00"}, VARIETY_WISE_SOURCE)
-
-    unique, conflicting = split_duplicates([old_name, new_name])
-
-    assert unique == [old_name]
-    assert conflicting == []
-
-
-def test_conflicting_duplicates_are_set_aside_entirely():
-    first = parse_record(RECORD, VARIETY_WISE_SOURCE)
-    second = parse_record({**RECORD, "Min_Price": "1750"}, VARIETY_WISE_SOURCE)
-    other_day = parse_record({**RECORD, "Arrival_Date": "20/11/2026"}, VARIETY_WISE_SOURCE)
-
-    unique, conflicting = split_duplicates([first, second, other_day])
-
-    assert unique == [other_day]
-    assert conflicting == [first.key()]
