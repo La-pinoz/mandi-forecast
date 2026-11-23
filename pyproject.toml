@@ -1,0 +1,34 @@
+[project]
+name = "mandi"
+version = "0.1.0"
+description = "Daily wholesale price forecasts for West Bengal tomato and onion markets (Agmarknet via data.gov.in)."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "psycopg[binary]>=3.2",
+    "python-dotenv>=1.0",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.0",
+    "pytest>=8.3",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 110
+target-version = "py313"
+# research/ holds the throwaway M01 scripts; they are kept unchanged as the M01 record.
+extend-exclude = ["research"]
+
+[tool.ruff.lint]
+# E/W pycodestyle, F pyflakes, I import order, B bugbear (likely bugs), UP modern syntax.
+select = ["E", "W", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
