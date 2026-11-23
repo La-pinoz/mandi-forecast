@@ -15,6 +15,8 @@ EXPECTED_TABLES = {
     "series_day_status",
     "quarantine",
     "reporting_gaps_by_date",  # a view (information_schema.tables lists views too)
+    "forecasts",
+    "forecast_scores",
 }
 
 
@@ -70,7 +72,7 @@ def test_project_migrations_are_validly_named():
     files = list_migration_files(MIGRATIONS_DIR)
 
     assert files[0].name.startswith("001_")
-    assert len(files) == 9
+    assert len(files) == 11
 
 
 # --- Applying migrations (needs TEST_DATABASE_URL) ---

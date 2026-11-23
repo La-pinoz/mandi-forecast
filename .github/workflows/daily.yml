@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  ingest-and-recheck:
+  ingest-forecast-score:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -34,9 +34,22 @@ jobs:
         run: uv sync --locked
 
       - name: Ingest yesterday and today
+        id: ingest
         run: uv run python -m mandi.ingest.ogd ingest
 
       # Runs even if the ingest step failed (the two cover different dates); the workflow still ends red.
       - name: Recheck the 7 dates before those
         if: ${{ !cancelled() }}
         run: uv run python -m mandi.ingest.ogd recheck
+
+      # Only after a successful ingest: a forecast made from stale data would block today's real one, because
+      # each series, origin day, horizon and model can be forecast once. If ingest failed, re-run the workflow
+      # once the source works again; the origin day stays the same until midnight IST.
+      - name: Forecast (naive and seasonal naive, horizons 1-7)
+        if: ${{ !cancelled() && steps.ingest.outcome == 'success' }}
+        run: uv run python -m mandi.models.daily_forecast
+
+      # Scores any forecast whose target date now has a reported price; independent of today's ingest.
+      - name: Provisional scores
+        if: ${{ !cancelled() }}
+        run: uv run python -m mandi.evaluate.scoring
