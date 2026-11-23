@@ -61,16 +61,33 @@ def prices_by_series(conn: psycopg.Connection, cutoff: datetime) -> dict[int, di
 
     A series with no price yet maps to an empty dict.
     """
+    prices, _ = prices_and_spreads_by_series(conn, cutoff)
+    return prices
+
+
+def prices_and_spreads_by_series(
+    conn: psycopg.Connection, cutoff: datetime
+) -> tuple[dict[int, dict[date, float]], dict[int, dict[date, float]]]:
+    """Modal prices as in `prices_by_series`, and each day's spread (max - min) / modal for the same days.
+
+    The spread is a LightGBM feature (M08); prices are positive (M04 contracts), so modal is never zero.
+    """
     series_ids = {}
     for series_id, source, market, commodity, variety, grade in conn.execute(ACTIVE_SERIES).fetchall():
         series_ids[(source, market, commodity, variety, grade)] = series_id
 
     prices = {series_id: {} for series_id in series_ids.values()}
+    spreads = {series_id: {} for series_id in series_ids.values()}
     for row in prices_as_of(conn, cutoff):
         series_key = (row["source"], row["market"], row["commodity"], row["variety"], row["grade"])
         if series_key in series_ids:
-            prices[series_ids[series_key]][row["arrival_date"]] = float(row["modal_price"])
-    return prices
+            series_id = series_ids[series_key]
+            modal = float(row["modal_price"])
+            prices[series_id][row["arrival_date"]] = modal
+            spreads[series_id][row["arrival_date"]] = (
+                float(row["max_price"]) - float(row["min_price"])
+            ) / modal
+    return prices, spreads
 
 
 def forecast_baselines(conn: psycopg.Connection, cutoff: datetime) -> tuple[int, ForecastSummary]:

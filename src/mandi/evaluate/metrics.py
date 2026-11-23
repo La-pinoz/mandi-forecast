@@ -1,9 +1,10 @@
-"""Point-forecast metrics (blueprint 8.2): MAE, sMAPE and MASE.
+"""Point-forecast metrics (blueprint 8.2): MAE, sMAPE and MASE; and one Diebold-Mariano test (8.4).
 
 Every function takes forecasts and actuals of the same rows (already filtered to forecasts that have a value
 and targets that were reported). Prices are positive (M04 contracts), so no denominator can be zero.
 """
 
+import math
 from datetime import date, timedelta
 
 import pandas as pd
@@ -51,3 +52,25 @@ def mase(forecasts: pd.Series, actuals: pd.Series, scales: pd.Series) -> float:
     if scales.isna().any() or (scales == 0).any():
         raise ValueError("every row needs a positive MASE scale")
     return float(((forecasts - actuals).abs() / scales).mean())
+
+
+def diebold_mariano(loss_differences: pd.Series, max_lag: int) -> tuple[float, float]:
+    """Diebold-Mariano test that the mean loss difference is zero. Returns (statistic, two-sided p-value).
+
+    `loss_differences` is one value per time step, in time order (e.g. model A's absolute error minus model
+    B's). Neighbouring errors are correlated, so the variance of the mean uses the Newey-West estimate:
+    autocovariances up to `max_lag` steps, weighted 1 - k / (max_lag + 1). The p-value uses the normal
+    distribution (large-sample approximation). A negative statistic means model A has the smaller loss.
+    """
+    values = loss_differences.to_numpy(dtype=float)
+    count = len(values)
+    centred = values - values.mean()
+    long_run_variance = float((centred * centred).sum()) / count
+    for lag in range(1, max_lag + 1):
+        autocovariance = float((centred[lag:] * centred[:-lag]).sum()) / count
+        long_run_variance += 2 * (1 - lag / (max_lag + 1)) * autocovariance
+    if long_run_variance <= 0:
+        raise ValueError("loss differences have no variance; the test is undefined")
+    statistic = values.mean() / math.sqrt(long_run_variance / count)
+    p_value = math.erfc(abs(statistic) / math.sqrt(2))
+    return float(statistic), p_value

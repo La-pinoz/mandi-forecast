@@ -4,8 +4,7 @@ Rolling-origin backtest results for every model, all run through the same harnes
 (`src/mandi/evaluate/backtest.py`). This page covers **backtest** results only. Live results (forecasts made
 each morning and scored as actuals arrive) are a separate record and are never mixed into these tables.
 
-Sections: [setup](#setup) · [limitations](#limitations) · [baselines](#baselines-m07) · LightGBM (M08, not yet
-built).
+Sections: [setup](#setup) · [limitations](#limitations) · [baselines](#baselines-m07) · [LightGBM](#lightgbm-m08).
 
 ---
 
@@ -263,3 +262,400 @@ Barasat has two series (tomato and onion); they are pooled here and split in the
 
 Seasonal naive has no unlabelled rows: a scored seasonal-naive forecast always has a reported t − 7, which is
 exactly what the label needs (see the caveat in [setup](#setup)).
+
+---
+
+## LightGBM (M08)
+
+Run on 2026-11-23 with:
+
+```bash
+uv run python -m mandi.evaluate.backtest_lgbm
+```
+
+Inputs: prices as known at 2026-11-23 21:39 IST; latest arrival date 2026-11-22. Same 150 folds, origins,
+targets, information rule, volatile labels and MASE scales as the baselines above. 77,042 feature rows
+(origins 2023-01-02 to 2026-11-15; the 2023 origins are training-only). Per-forecast rows:
+`data/backtest/lgbm_forecasts.csv` (not committed; re-created by the command). The run was repeated once
+(to add the "unchanged vs. changed" table); every other table was identical.
+
+**The model** (`src/mandi/models/lgbm.py`, features in `src/mandi/features/build.py`): one global LightGBM
+for all 8 series. It predicts log(price(target) / p_last), where p_last is the last price known at the
+origin, and forecasts p_last · exp(prediction), so a prediction of 0 is exactly naive. Features: lags 1, 2,
+3, 7, 14, 28 days (NaN when unreported), days since the last price, mean/std/min/max and count of reported
+days over 7/14/28-day calendar windows, the min–max spread, target day of week and month, series/crop/market
+(categorical), and log(p_last). Every feature uses only prices dated before the origin. Fixed parameters, no
+tuning: 300 trees, learning rate 0.05, 15 leaves, ≥ 50 rows per leaf, 80% of features per tree, L1 objective
+(median = P50). Each fold trains on the rows whose **target** date is before its cutoff.
+
+**Fixed before any LightGBM result was seen:** the one choice made from results (pooled model with horizon as
+a feature vs. one model per horizon) uses only the **development** origins (2024); the headline comparison
+uses the **held-out** origins (2025-01-01 to 2026-11-15), which played no part in any choice. The shock
+phases, completeness bins and the single Diebold–Mariano test were also defined in advance
+(`docs/M08-lightgbm.md`).
+
+### Findings
+
+1. **LightGBM does not beat naive.** Held-out, on rows both scored (n = 36,401): MASE 0.646 vs. 0.611, MAE
+   ₹223.7 vs. ₹213.3, sMAPE 8.17% vs. 7.82%. It does beat seasonal naive (MASE 0.602 vs. 0.754 on the h = 1–6
+   rows all three models scored). Naive remains the baseline to beat.
+2. **It loses almost everywhere, and more at longer horizons.** Worse at every horizon (MASE 0.375 vs. 0.373
+   at h = 1, 0.892 vs. 0.824 at h = 7), for both crops and in every market, and in 54 of 56 series × horizon
+   cells. The largest gaps are onion at h = 5–7 (Barasat onion h = 7: 0.983 vs. 0.856). The smallest are
+   Habra tomato, the most volatile series.
+3. **Why: prices often don't change.** In 38.7% of held-out rows (14,079; 52% at h = 1, 29% at h = 7) the
+   target's modal price is *exactly* the last known price. Naive is perfect on those rows; LightGBM, which
+   predicts small moves, averages ₹40.3 there. On the rows where the price did change, LightGBM is better than
+   naive **at every horizon** (overall MAE ₹339.3 vs. ₹347.9, MASE 0.973 vs. 0.997). This split is by outcome
+   (it can't be known at the origin), so it's a diagnosis, not a usable rule. It shows the model has some
+   signal, and that the overall loss comes from the cost of predicting movement on the many days without any.
+4. **Shocks: slightly better than naive, but both fail.** On volatile target dates LightGBM's MASE is 1.855
+   vs. 1.911. By phase: at the **start** of a shock 2.243 vs. 2.317 (MAE ₹736 vs. ₹766), **during** 1.401 vs.
+   1.436, but in **recovery** 0.578 vs. 0.539 and on **calm** days 0.497 vs. 0.453. Neither model anticipates
+   a shock; LightGBM's small advantage there is outweighed by its losses on the far more common calm days.
+5. **Completeness and staleness (volume stand-ins; there is no volume field).** 82% of held-out rows have
+   ≥ 90% of the previous 28 days reported; only 14 rows have < 70%, too few to conclude anything. LightGBM loses
+   in both large bins. 95% of rows have yesterday reported. When the last price is 3–6 days old (n = 359) the
+   gap widens (MASE 0.863 vs. 0.760). There were no held-out rows with a last price 7+ days old.
+6. **The layout choice barely mattered.** Per horizon was chosen on the development origins by MASE 0.928
+   vs. 0.931 (pooled). On held-out, pooled was marginally better (0.641 vs. 0.646). Both lose to naive in both
+   periods. Per horizon was clearly better at h = 1 in development (0.503 vs. 0.590).
+7. **Feature importance (gain, last fold).** The largest shares are the price level `log_last_price` (13.5%),
+   `target_month` (8.8%), 28-day volatility `std_28` (7.7%) and `lag_28` (6.3%). The level and the month
+   together describe "is the price high for this time of year", which matches how mandi prices behave:
+   seasonal harvests bring new arrivals and push unusually high prices back down. Volatility sets how large a
+   move is plausible. Day of week has almost none (0.3%), consistent with the baselines finding no weekly
+   pattern. `lag_1` and `days_since_last` have none: yesterday is reported in 95% of rows, so they barely vary.
+   Gain shows what the trees split on, not causal effects, and it is from one fold's models.
+8. **Diebold–Mariano (the one test): held-out, h = 1, LightGBM vs. naive.** Over 684 days, LightGBM's absolute
+   error was higher by ₹1.2 per day on average; statistic 7.59, two-sided p < 0.0001 (Newey–West, 7 lags). At
+   h = 1 the difference is tiny in rupees but consistent: LightGBM is reliably slightly **worse**, not better.
+   One test only; other horizons were not tested.
+
+### Layout choice (development origins, before 2025-01-01)
+
+Chosen: **lgbm_per_horizon** (renamed lgbm.v1).
+
+| model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|
+| lgbm.v1 | 18846 | 327.1 | 9.3 | 0.928 |
+| lgbm_pooled | 18846 | 328.8 | 9.34 | 0.931 |
+| naive.v1 | 18846 | 310.7 | 8.87 | 0.881 |
+
+By horizon:
+
+| horizon_days | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| 1 | lgbm.v1 | 2693 | 176.1 | 5.13 | 0.503 |
+| 1 | lgbm_pooled | 2693 | 207.1 | 5.97 | 0.59 |
+| 1 | naive.v1 | 2693 | 170.3 | 4.97 | 0.486 |
+| 2 | lgbm.v1 | 2693 | 235.1 | 6.77 | 0.671 |
+| 2 | lgbm_pooled | 2693 | 249.5 | 7.17 | 0.71 |
+| 2 | naive.v1 | 2693 | 222.4 | 6.44 | 0.633 |
+| 3 | lgbm.v1 | 2693 | 286.0 | 8.19 | 0.815 |
+| 3 | lgbm_pooled | 2693 | 290.6 | 8.3 | 0.827 |
+| 3 | naive.v1 | 2693 | 268.2 | 7.72 | 0.765 |
+| 4 | lgbm.v1 | 2692 | 337.5 | 9.62 | 0.959 |
+| 4 | lgbm_pooled | 2692 | 335.0 | 9.53 | 0.949 |
+| 4 | naive.v1 | 2692 | 315.2 | 9.02 | 0.894 |
+| 5 | lgbm.v1 | 2691 | 381.6 | 10.81 | 1.078 |
+| 5 | lgbm_pooled | 2691 | 373.3 | 10.57 | 1.056 |
+| 5 | naive.v1 | 2691 | 360.1 | 10.24 | 1.02 |
+| 6 | lgbm.v1 | 2691 | 416.6 | 11.8 | 1.179 |
+| 6 | lgbm_pooled | 2691 | 408.3 | 11.51 | 1.15 |
+| 6 | naive.v1 | 2691 | 401.1 | 11.33 | 1.133 |
+| 7 | lgbm.v1 | 2693 | 456.7 | 12.8 | 1.293 |
+| 7 | lgbm_pooled | 2693 | 437.8 | 12.34 | 1.234 |
+| 7 | naive.v1 | 2693 | 437.5 | 12.36 | 1.237 |
+
+### Both layouts and naive, by period (like-for-like)
+
+| period | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| development | lgbm.v1 | 18846 | 327.1 | 9.3 | 0.928 |
+| development | lgbm_pooled | 18846 | 328.8 | 9.34 | 0.931 |
+| development | naive.v1 | 18846 | 310.7 | 8.87 | 0.881 |
+| held-out | lgbm.v1 | 36401 | 223.7 | 8.17 | 0.646 |
+| held-out | lgbm_pooled | 36401 | 222.3 | 8.16 | 0.641 |
+| held-out | naive.v1 | 36401 | 213.3 | 7.82 | 0.611 |
+
+### Held-out (2025-01-01 onwards): availability
+
+| model_version | forecasts | available | available % | target unreported | scored |
+|---|---|---|---|---|---|
+| lgbm.v1 | 38304 | 38304 | 100.0 | 1903 | 36401 |
+| naive.v1 | 38304 | 38304 | 100.0 | 1903 | 36401 |
+| seasonal_naive.v1 | 38304 | 31177 | 81.4 | 1365 | 29812 |
+
+### Held-out, like-for-like: lgbm.v1 vs. naive
+
+| model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|
+| lgbm.v1 | 36401 | 223.7 | 8.17 | 0.646 |
+| naive.v1 | 36401 | 213.3 | 7.82 | 0.611 |
+
+### Held-out, all three models on rows all scored (horizons 1-6)
+
+| model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|
+| lgbm.v1 | 29812 | 210.1 | 7.67 | 0.602 |
+| naive.v1 | 29812 | 201.2 | 7.37 | 0.573 |
+| seasonal_naive.v1 | 29812 | 266.2 | 9.73 | 0.754 |
+
+### Held-out, lgbm.v1 vs. naive, by horizon
+
+| horizon_days | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| 1 | lgbm.v1 | 5201 | 128.8 | 4.77 | 0.375 |
+| 1 | naive.v1 | 5201 | 127.6 | 4.73 | 0.373 |
+| 2 | lgbm.v1 | 5201 | 166.3 | 6.1 | 0.479 |
+| 2 | naive.v1 | 5201 | 162.2 | 5.95 | 0.467 |
+| 3 | lgbm.v1 | 5201 | 198.7 | 7.27 | 0.568 |
+| 3 | naive.v1 | 5201 | 191.1 | 6.99 | 0.545 |
+| 4 | lgbm.v1 | 5202 | 227.0 | 8.29 | 0.654 |
+| 4 | naive.v1 | 5202 | 216.0 | 7.91 | 0.619 |
+| 5 | lgbm.v1 | 5201 | 255.6 | 9.34 | 0.737 |
+| 5 | naive.v1 | 5201 | 242.8 | 8.9 | 0.695 |
+| 6 | lgbm.v1 | 5199 | 282.4 | 10.24 | 0.816 |
+| 6 | naive.v1 | 5199 | 265.4 | 9.71 | 0.758 |
+| 7 | lgbm.v1 | 5196 | 307.0 | 11.17 | 0.892 |
+| 7 | naive.v1 | 5196 | 288.2 | 10.55 | 0.824 |
+
+### Held-out, lgbm.v1 vs. naive, by crop
+
+| crop | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| Onion | lgbm.v1 | 17756 | 121.0 | 5.36 | 0.641 |
+| Onion | naive.v1 | 17756 | 111.3 | 4.93 | 0.593 |
+| Tomato | lgbm.v1 | 18645 | 321.4 | 10.84 | 0.651 |
+| Tomato | naive.v1 | 18645 | 310.5 | 10.58 | 0.629 |
+
+### Held-out, lgbm.v1 vs. naive, by market
+
+| market | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| Asansol | lgbm.v1 | 4554 | 96.7 | 4.38 | 0.555 |
+| Asansol | naive.v1 | 4554 | 88.7 | 4.02 | 0.51 |
+| Bankura Sadar | lgbm.v1 | 4199 | 110.4 | 4.73 | 0.618 |
+| Bankura Sadar | naive.v1 | 4199 | 99.1 | 4.24 | 0.562 |
+| Barasat | lgbm.v1 | 9241 | 222.3 | 8.7 | 0.678 |
+| Barasat | naive.v1 | 9241 | 207.8 | 8.22 | 0.63 |
+| Habra | lgbm.v1 | 4662 | 364.7 | 14.27 | 0.673 |
+| Habra | naive.v1 | 4662 | 361.8 | 14.36 | 0.668 |
+| Karsiyang(Matigara) | lgbm.v1 | 4697 | 306.1 | 8.22 | 0.629 |
+| Karsiyang(Matigara) | naive.v1 | 4697 | 294.9 | 7.99 | 0.607 |
+| Medinipur(West) | lgbm.v1 | 4400 | 134.0 | 6.16 | 0.718 |
+| Medinipur(West) | naive.v1 | 4400 | 128.6 | 5.86 | 0.692 |
+| Sealdah Koley Market | lgbm.v1 | 4648 | 313.3 | 9.67 | 0.618 |
+| Sealdah Koley Market | naive.v1 | 4648 | 298.5 | 9.11 | 0.59 |
+
+### Held-out, lgbm.v1 vs. naive, by series
+
+| market | crop | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|---|
+| Asansol | Onion | lgbm.v1 | 4554 | 96.7 | 4.38 | 0.555 |
+| Asansol | Onion | naive.v1 | 4554 | 88.7 | 4.02 | 0.51 |
+| Bankura Sadar | Onion | lgbm.v1 | 4199 | 110.4 | 4.73 | 0.618 |
+| Bankura Sadar | Onion | naive.v1 | 4199 | 99.1 | 4.24 | 0.562 |
+| Barasat | Onion | lgbm.v1 | 4603 | 142.5 | 6.16 | 0.673 |
+| Barasat | Onion | naive.v1 | 4603 | 128.3 | 5.56 | 0.609 |
+| Barasat | Tomato | lgbm.v1 | 4638 | 301.5 | 11.22 | 0.684 |
+| Barasat | Tomato | naive.v1 | 4638 | 286.6 | 10.87 | 0.65 |
+| Habra | Tomato | lgbm.v1 | 4662 | 364.7 | 14.27 | 0.673 |
+| Habra | Tomato | naive.v1 | 4662 | 361.8 | 14.36 | 0.668 |
+| Karsiyang(Matigara) | Tomato | lgbm.v1 | 4697 | 306.1 | 8.22 | 0.629 |
+| Karsiyang(Matigara) | Tomato | naive.v1 | 4697 | 294.9 | 7.99 | 0.607 |
+| Medinipur(West) | Onion | lgbm.v1 | 4400 | 134.0 | 6.16 | 0.718 |
+| Medinipur(West) | Onion | naive.v1 | 4400 | 128.6 | 5.86 | 0.692 |
+| Sealdah Koley Market | Tomato | lgbm.v1 | 4648 | 313.3 | 9.67 | 0.618 |
+| Sealdah Koley Market | Tomato | naive.v1 | 4648 | 298.5 | 9.11 | 0.59 |
+
+### Held-out, lgbm.v1 vs. naive, by normal vs. volatile target dates
+
+| regime | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| normal | lgbm.v1 | 31717 | 189.0 | 6.66 | 0.526 |
+| normal | naive.v1 | 31717 | 175.6 | 6.2 | 0.483 |
+| unlabelled | lgbm.v1 | 1623 | 214.0 | 8.04 | 0.71 |
+| unlabelled | naive.v1 | 1623 | 203.3 | 7.62 | 0.66 |
+| volatile | lgbm.v1 | 3061 | 588.3 | 23.9 | 1.855 |
+| volatile | naive.v1 | 3061 | 609.7 | 24.74 | 1.911 |
+
+### Error analysis: series x horizon cells where lgbm.v1 loses to naive (MASE)
+
+lgbm.v1 loses in 54 of 56 cells.
+
+| market | crop | horizon_days | n | naive MASE | lgbm MASE | difference |
+|---|---|---|---|---|---|---|
+| Barasat | Onion | 7 | 657 | 0.856 | 0.983 | 0.127 |
+| Barasat | Onion | 6 | 657 | 0.782 | 0.899 | 0.117 |
+| Bankura Sadar | Onion | 7 | 600 | 0.799 | 0.909 | 0.11 |
+| Asansol | Onion | 7 | 649 | 0.694 | 0.793 | 0.099 |
+| Bankura Sadar | Onion | 6 | 601 | 0.71 | 0.803 | 0.093 |
+| Bankura Sadar | Onion | 5 | 601 | 0.649 | 0.731 | 0.082 |
+| Barasat | Onion | 5 | 657 | 0.713 | 0.794 | 0.081 |
+| Asansol | Onion | 6 | 650 | 0.627 | 0.703 | 0.076 |
+| Medinipur(West) | Onion | 7 | 627 | 0.832 | 0.908 | 0.076 |
+| Barasat | Tomato | 7 | 662 | 0.909 | 0.971 | 0.062 |
+| Barasat | Onion | 4 | 658 | 0.633 | 0.693 | 0.06 |
+| Barasat | Tomato | 6 | 662 | 0.839 | 0.896 | 0.057 |
+| Bankura Sadar | Onion | 4 | 600 | 0.57 | 0.626 | 0.056 |
+| Medinipur(West) | Onion | 6 | 628 | 0.793 | 0.839 | 0.046 |
+| Asansol | Onion | 4 | 651 | 0.499 | 0.544 | 0.045 |
+| Asansol | Onion | 5 | 651 | 0.573 | 0.618 | 0.045 |
+| Sealdah Koley Market | Tomato | 6 | 664 | 0.738 | 0.781 | 0.043 |
+| Barasat | Tomato | 5 | 662 | 0.752 | 0.794 | 0.042 |
+| Karsiyang(Matigara) | Tomato | 7 | 671 | 0.826 | 0.867 | 0.041 |
+| Karsiyang(Matigara) | Tomato | 6 | 671 | 0.757 | 0.798 | 0.041 |
+| Sealdah Koley Market | Tomato | 5 | 664 | 0.678 | 0.717 | 0.039 |
+| Barasat | Onion | 3 | 658 | 0.523 | 0.561 | 0.038 |
+| Sealdah Koley Market | Tomato | 4 | 664 | 0.603 | 0.638 | 0.035 |
+| Asansol | Onion | 3 | 651 | 0.445 | 0.478 | 0.033 |
+| Sealdah Koley Market | Tomato | 7 | 664 | 0.796 | 0.829 | 0.033 |
+| Barasat | Tomato | 4 | 663 | 0.656 | 0.689 | 0.033 |
+| Bankura Sadar | Onion | 3 | 599 | 0.475 | 0.508 | 0.033 |
+| Karsiyang(Matigara) | Tomato | 5 | 671 | 0.693 | 0.722 | 0.029 |
+| Sealdah Koley Market | Tomato | 3 | 664 | 0.532 | 0.56 | 0.028 |
+| Karsiyang(Matigara) | Tomato | 4 | 671 | 0.614 | 0.641 | 0.027 |
+| Medinipur(West) | Onion | 5 | 629 | 0.753 | 0.776 | 0.023 |
+| Barasat | Tomato | 3 | 663 | 0.563 | 0.586 | 0.023 |
+| Medinipur(West) | Onion | 4 | 629 | 0.698 | 0.719 | 0.021 |
+| Barasat | Onion | 2 | 658 | 0.426 | 0.444 | 0.018 |
+| Asansol | Onion | 2 | 651 | 0.401 | 0.416 | 0.015 |
+| Bankura Sadar | Onion | 2 | 599 | 0.406 | 0.421 | 0.015 |
+| Sealdah Koley Market | Tomato | 2 | 664 | 0.446 | 0.461 | 0.015 |
+| Barasat | Tomato | 2 | 663 | 0.467 | 0.48 | 0.013 |
+| Habra | Tomato | 3 | 666 | 0.617 | 0.629 | 0.012 |
+| Karsiyang(Matigara) | Tomato | 3 | 671 | 0.548 | 0.56 | 0.012 |
+| Habra | Tomato | 4 | 666 | 0.672 | 0.681 | 0.009 |
+| Medinipur(West) | Onion | 3 | 629 | 0.653 | 0.662 | 0.009 |
+| Habra | Tomato | 2 | 666 | 0.534 | 0.542 | 0.008 |
+| Medinipur(West) | Onion | 2 | 629 | 0.596 | 0.603 | 0.007 |
+| Karsiyang(Matigara) | Tomato | 2 | 671 | 0.455 | 0.461 | 0.006 |
+| Barasat | Onion | 1 | 658 | 0.333 | 0.337 | 0.004 |
+| Sealdah Koley Market | Tomato | 1 | 664 | 0.335 | 0.339 | 0.004 |
+| Barasat | Tomato | 1 | 663 | 0.366 | 0.37 | 0.004 |
+| Bankura Sadar | Onion | 1 | 599 | 0.325 | 0.329 | 0.004 |
+| Habra | Tomato | 5 | 666 | 0.745 | 0.749 | 0.004 |
+| Habra | Tomato | 1 | 666 | 0.418 | 0.421 | 0.003 |
+| Karsiyang(Matigara) | Tomato | 1 | 671 | 0.354 | 0.357 | 0.003 |
+| Habra | Tomato | 7 | 666 | 0.878 | 0.881 | 0.003 |
+| Asansol | Onion | 1 | 651 | 0.329 | 0.331 | 0.002 |
+
+### Error analysis: shock phase
+
+| shock_phase | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| calm | lgbm.v1 | 20439 | 175.9 | 6.07 | 0.497 |
+| calm | naive.v1 | 20439 | 161.7 | 5.6 | 0.453 |
+| during | lgbm.v1 | 1412 | 415.8 | 18.58 | 1.401 |
+| during | naive.v1 | 1412 | 426.8 | 18.93 | 1.436 |
+| recovery | lgbm.v1 | 11278 | 212.6 | 7.72 | 0.578 |
+| recovery | naive.v1 | 11278 | 200.7 | 7.28 | 0.539 |
+| start | lgbm.v1 | 1649 | 736.0 | 28.46 | 2.243 |
+| start | naive.v1 | 1649 | 766.3 | 29.72 | 2.317 |
+| unlabelled | lgbm.v1 | 1623 | 214.0 | 8.04 | 0.71 |
+| unlabelled | naive.v1 | 1623 | 203.3 | 7.62 | 0.66 |
+
+### Error analysis: share of the 28 days before the origin reported
+
+| completeness_28d | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| a: < 70% | lgbm.v1 | 14 | 156.7 | 12.36 | 0.944 |
+| a: < 70% | naive.v1 | 14 | 160.0 | 12.75 | 0.964 |
+| b: 70-90% | lgbm.v1 | 6531 | 159.1 | 6.1 | 0.619 |
+| b: 70-90% | naive.v1 | 6531 | 150.7 | 5.79 | 0.574 |
+| c: >= 90% | lgbm.v1 | 29856 | 237.8 | 8.62 | 0.652 |
+| c: >= 90% | naive.v1 | 29856 | 227.0 | 8.26 | 0.619 |
+
+### Error analysis: days since the last observation at the origin
+
+| days_since_last_bin | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| a: 1 | lgbm.v1 | 34654 | 223.9 | 8.16 | 0.641 |
+| a: 1 | naive.v1 | 34654 | 213.5 | 7.81 | 0.607 |
+| b: 2 | lgbm.v1 | 1388 | 210.1 | 7.89 | 0.72 |
+| b: 2 | naive.v1 | 1388 | 202.7 | 7.62 | 0.684 |
+| c: 3-6 | lgbm.v1 | 359 | 254.8 | 10.07 | 0.863 |
+| c: 3-6 | naive.v1 | 359 | 238.4 | 9.34 | 0.76 |
+
+### Error analysis: target price equal to the last known price, or changed (by outcome)
+
+| target_vs_last_price | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|
+| changed | lgbm.v1 | 22322 | 339.3 | 12.33 | 0.973 |
+| changed | naive.v1 | 22322 | 347.9 | 12.75 | 0.997 |
+| unchanged | lgbm.v1 | 14079 | 40.3 | 1.57 | 0.128 |
+| unchanged | naive.v1 | 14079 | 0.0 | 0.0 | 0.0 |
+
+By horizon:
+
+| target_vs_last_price | horizon_days | model_version | n | MAE | sMAPE % | MASE |
+|---|---|---|---|---|---|---|
+| changed | 1 | lgbm.v1 | 2474 | 267.5 | 9.91 | 0.779 |
+| changed | 1 | naive.v1 | 2474 | 268.3 | 9.95 | 0.783 |
+| changed | 2 | lgbm.v1 | 2825 | 295.8 | 10.84 | 0.85 |
+| changed | 2 | naive.v1 | 2825 | 298.7 | 10.96 | 0.859 |
+| changed | 3 | lgbm.v1 | 3051 | 321.0 | 11.69 | 0.915 |
+| changed | 3 | naive.v1 | 3051 | 325.8 | 11.91 | 0.929 |
+| changed | 4 | lgbm.v1 | 3265 | 337.2 | 12.24 | 0.964 |
+| changed | 4 | naive.v1 | 3265 | 344.1 | 12.61 | 0.986 |
+| changed | 5 | lgbm.v1 | 3458 | 353.4 | 12.83 | 1.011 |
+| changed | 5 | naive.v1 | 3458 | 365.2 | 13.39 | 1.045 |
+| changed | 6 | lgbm.v1 | 3562 | 374.1 | 13.48 | 1.07 |
+| changed | 6 | naive.v1 | 3562 | 387.4 | 14.17 | 1.106 |
+| changed | 7 | lgbm.v1 | 3687 | 391.1 | 14.14 | 1.125 |
+| changed | 7 | naive.v1 | 3687 | 406.1 | 14.87 | 1.162 |
+| unchanged | 1 | lgbm.v1 | 2727 | 3.0 | 0.11 | 0.009 |
+| unchanged | 1 | naive.v1 | 2727 | 0.0 | 0.0 | 0.0 |
+| unchanged | 2 | lgbm.v1 | 2376 | 12.3 | 0.46 | 0.037 |
+| unchanged | 2 | naive.v1 | 2376 | 0.0 | 0.0 | 0.0 |
+| unchanged | 3 | lgbm.v1 | 2150 | 25.0 | 1.01 | 0.077 |
+| unchanged | 3 | naive.v1 | 2150 | 0.0 | 0.0 | 0.0 |
+| unchanged | 4 | lgbm.v1 | 1937 | 41.1 | 1.63 | 0.131 |
+| unchanged | 4 | naive.v1 | 1937 | 0.0 | 0.0 | 0.0 |
+| unchanged | 5 | lgbm.v1 | 1743 | 61.6 | 2.42 | 0.196 |
+| unchanged | 5 | naive.v1 | 1743 | 0.0 | 0.0 | 0.0 |
+| unchanged | 6 | lgbm.v1 | 1637 | 82.7 | 3.19 | 0.265 |
+| unchanged | 6 | naive.v1 | 1637 | 0.0 | 0.0 | 0.0 |
+| unchanged | 7 | lgbm.v1 | 1509 | 101.6 | 3.93 | 0.325 |
+| unchanged | 7 | naive.v1 | 1509 | 0.0 | 0.0 | 0.0 |
+
+### Feature importance (share of total gain, lgbm.v1, last fold)
+
+| feature | gain % |
+|---|---|
+| log_last_price | 13.5 |
+| target_month | 8.8 |
+| std_28 | 7.7 |
+| lag_28 | 6.3 |
+| spread_mean_7 | 5.4 |
+| series_id | 5.1 |
+| std_14 | 4.6 |
+| count_28 | 4.6 |
+| max_28 | 4.5 |
+| spread_last | 3.7 |
+| mean_28 | 3.6 |
+| min_28 | 3.6 |
+| max_14 | 3.4 |
+| lag_14 | 3.0 |
+| std_7 | 2.6 |
+| min_14 | 2.6 |
+| mean_14 | 2.4 |
+| max_7 | 2.2 |
+| lag_7 | 2.1 |
+| min_7 | 1.9 |
+| mean_7 | 1.5 |
+| lag_2 | 1.4 |
+| count_14 | 1.3 |
+| lag_3 | 1.3 |
+| crop | 1.1 |
+| market | 0.8 |
+| count_7 | 0.7 |
+| target_day_of_week | 0.3 |
+| days_since_last | 0.0 |
+| lag_1 | 0.0 |
+
+### Diebold-Mariano test (held-out, horizon 1, lgbm.v1 vs. naive)
+
+Days: 684. Mean daily |error| difference (lgbm - naive): 1.2 rupees. Newey-West lags: 7. Statistic: 7.59. Two-sided p-value: 0.0000.

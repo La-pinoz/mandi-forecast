@@ -1,11 +1,12 @@
-"""MAE, sMAPE, MASE and the MASE scale (pure functions, no database)."""
+"""MAE, sMAPE, MASE, the MASE scale and the Diebold-Mariano test (pure functions, no database)."""
 
+import math
 from datetime import date
 
 import pandas as pd
 import pytest
 
-from mandi.evaluate.metrics import mase, mean_absolute_error, seasonal_naive_scale, smape
+from mandi.evaluate.metrics import diebold_mariano, mase, mean_absolute_error, seasonal_naive_scale, smape
 
 
 def test_mean_absolute_error():
@@ -58,3 +59,21 @@ def test_mase_scale_uses_only_days_before_the_cutoff():
 def test_mase_scale_is_none_without_a_complete_pair():
     assert seasonal_naive_scale(SCALE_PRICES, cutoff_date=date(2024, 1, 8)) is None
     assert seasonal_naive_scale({}, cutoff_date=date(2024, 1, 8)) is None
+
+
+def test_diebold_mariano_by_hand_without_and_with_newey_west_lags():
+    # d = 1, 2, 3, 4: mean 2.5, autocovariance at lag 0 = 1.25, at lag 1 = 0.3125 (sums divided by 4).
+    differences = pd.Series([1.0, 2.0, 3.0, 4.0])
+
+    statistic, p_value = diebold_mariano(differences, max_lag=0)
+    assert statistic == pytest.approx(2.5 / math.sqrt(1.25 / 4))  # 4.472
+    assert p_value == pytest.approx(math.erfc(statistic / math.sqrt(2)))
+
+    # Lag 1 with weight 1 - 1/2: variance (1.25 + 2 * 0.5 * 0.3125) / 4 = 0.390625, statistic 2.5 / 0.625.
+    statistic, _ = diebold_mariano(differences, max_lag=1)
+    assert statistic == pytest.approx(4.0)
+
+
+def test_diebold_mariano_refuses_constant_differences():
+    with pytest.raises(ValueError, match="no variance"):
+        diebold_mariano(pd.Series([2.0, 2.0, 2.0]), max_lag=1)
