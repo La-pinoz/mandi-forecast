@@ -45,11 +45,13 @@ jobs:
       # Only after a successful ingest: a forecast made from stale data would block today's real one, because
       # each series, origin day, horizon and model can be forecast once. If ingest failed, re-run the workflow
       # once the source works again; the origin day stays the same until midnight IST.
-      - name: Forecast (naive and seasonal naive, horizons 1-7)
+      # Baselines first (committed on their own), then the champion LightGBM from model_registry.
+      - name: Forecast (naive, seasonal naive and LightGBM, horizons 1-7)
         if: ${{ !cancelled() && steps.ingest.outcome == 'success' }}
         run: uv run python -m mandi.models.daily_forecast
 
-      # Scores any forecast whose target date now has a reported price; independent of today's ingest.
-      - name: Provisional scores
+      # Provisional scores for targets with a reported price; settled scores for targets more than 7 days old
+      # (after this morning's recheck looked at them for the last time). Independent of today's ingest.
+      - name: Provisional and settled scores
         if: ${{ !cancelled() }}
-        run: uv run python -m mandi.evaluate.scoring
+        run: uv run python -m mandi.evaluate.scoring --settling-days 7

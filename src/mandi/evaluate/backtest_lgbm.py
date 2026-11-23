@@ -32,7 +32,6 @@ from mandi.evaluate.backtest import (
     FIRST_FOLD_CUTOFF,
     MAX_HORIZON_DAYS,
     PROJECT_ROOT,
-    SERIES_INFO,
     Fold,
     availability_table,
     backtest_baselines,
@@ -46,7 +45,7 @@ from mandi.evaluate.metrics import diebold_mariano
 from mandi.features.build import build_feature_table
 from mandi.ingest.snapshot import IST
 from mandi.models.baselines import NAIVE_MODEL
-from mandi.models.daily_forecast import prices_and_spreads_by_series
+from mandi.models.daily_forecast import prices_and_spreads_by_series, series_info_table
 from mandi.models.lgbm import MODEL_VERSION, feature_importance, predict_prices, train
 from mandi.store.db import get_connection
 
@@ -298,9 +297,7 @@ def main() -> None:
     as_of = datetime.now(IST)
     with get_connection() as conn:
         prices, spreads = prices_and_spreads_by_series(conn, as_of)
-        series_info = pd.DataFrame(
-            conn.execute(SERIES_INFO).fetchall(), columns=["series_id", "market", "crop"]
-        )
+        series_info = series_info_table(conn)
 
     first_data_date = min(min(series_prices) for series_prices in prices.values() if series_prices)
     last_data_date = max(max(series_prices) for series_prices in prices.values() if series_prices)

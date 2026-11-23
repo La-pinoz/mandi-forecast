@@ -12,7 +12,8 @@ ingest + 7-day recheck on GitHub Actions) built and run by hand; waiting for its
 (naive and seasonal-naive live forecasts, provisional scoring) built and run by hand: the live record starts.
 M07 (rolling-origin backtest harness; baseline results in `docs/backtest_report.md`) done. M08 (global
 LightGBM, backtest only) done: it does **not** beat the naive baseline (`docs/backtest_report.md`,
-`docs/model_card.md`).
+`docs/model_card.md`). M09 (LightGBM in the daily run, model registry, settled scoring) built; the champion
+`lgbm.v1` is registered on Neon; waiting for the first scheduled run with it.
 
 ## Setup
 
@@ -37,8 +38,9 @@ uv run python -m mandi.validate.report         # print the data-quality report o
 uv run python -m mandi.ingest.ogd ingest        # fetch yesterday and today (IST) from data.gov.in
 uv run python -m mandi.ingest.ogd recheck       # fetch the 7 dates before those again (late rows, edits)
 uv run python -m mandi.ingest.ogd backfill --start 2026-11-01 --end 2026-11-07
-uv run python -m mandi.models.daily_forecast    # baseline forecasts, horizons 1-7, cutoff = now (IST)
-uv run python -m mandi.evaluate.scoring         # provisional scores for targets with a reported price
+uv run python -m mandi.models.register_lgbm     # train lgbm.v1 on all data, register it as champion (once)
+uv run python -m mandi.models.daily_forecast    # baselines + champion LightGBM, horizons 1-7, cutoff = now (IST)
+uv run python -m mandi.evaluate.scoring         # provisional scores; settled once a target is > 7 days old
 uv run python -m mandi.evaluate.backtest        # baseline backtest on the latest history; prints report tables
 uv run python -m mandi.evaluate.backtest_lgbm   # LightGBM backtest + error analysis (~15-25 min); prints tables
 ```

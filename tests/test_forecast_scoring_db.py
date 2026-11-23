@@ -1,4 +1,5 @@
-"""Live baseline forecasts and provisional scoring against the database (needs TEST_DATABASE_URL).
+"""Live forecasts (baselines and LightGBM) and provisional/settled scoring against the database
+(needs TEST_DATABASE_URL).
 
 Prices enter the way the daily job stores them: raw API records -> `process_snapshot` (contracts,
 quarantine, vintages) -> `refresh_prices_current`. One tracked series, Barasat Tomato.
@@ -6,14 +7,18 @@ quarantine, vintages) -> `refresh_prices_current`. One tracked series, Barasat T
 
 from datetime import date, datetime, timedelta, timezone
 
+import pandas as pd
 import psycopg
 import pytest
 
-from mandi.evaluate.scoring import ModelCounts, score_provisional, scoring_counts
+from mandi.evaluate.scoring import ModelCounts, ScoringResult, score_forecasts, scoring_counts
+from mandi.features.build import build_feature_table
 from mandi.ingest.records import VARIETY_WISE_SOURCE
 from mandi.ingest.snapshot import process_snapshot, tracked_series_keys
 from mandi.models.baselines import NAIVE_MODEL, SEASONAL_NAIVE_MODEL
-from mandi.models.daily_forecast import forecast_baselines
+from mandi.models.daily_forecast import forecast_baselines, forecast_lightgbm
+from mandi.models.lgbm import predict_prices
+from mandi.models.registry import register_model
 from mandi.store.runs import start_run
 from mandi.store.vintages import refresh_prices_current
 
@@ -147,10 +152,10 @@ def test_scoring_uses_only_reported_actuals_and_records_the_vintage(conn):
     # 24/11: nothing at all.
     assert conn.execute("SELECT count(*) FROM quarantine").fetchone()[0] == 1
 
-    run_id, added = score_provisional(conn)
+    run_id, result = score_forecasts(conn, today=date(2026, 11, 25))
 
     # Target 22/11: naive (3500) and seasonal naive (15/11 = 3100) are both scored; nothing else.
-    assert added == 2
+    assert result == ScoringResult(provisional_added=2, settled_added=0, revisions_recorded=0)
     vintage_22 = conn.execute(
         "SELECT vintage_id FROM price_vintages WHERE arrival_date = '2026-11-22'"
     ).fetchone()[0]
@@ -167,9 +172,17 @@ def test_scoring_uses_only_reported_actuals_and_records_the_vintage(conn):
     # Naive targets 22-28/11: 22 scored, 23 and 24 unreported, 25-28 awaiting.
     # Seasonal naive has values only for 22, 24, 25, 26/11: 22 scored, 24 unreported, 25 and 26 awaiting.
     assert scoring_counts(conn, today=date(2026, 11, 25)) == [
-        ModelCounts(NAIVE_MODEL, 7, unavailable=0, scored=1, awaiting_target_date=4, unreported_so_far=2),
         ModelCounts(
-            SEASONAL_NAIVE_MODEL, 7, unavailable=3, scored=1, awaiting_target_date=2, unreported_so_far=1
+            NAIVE_MODEL, 7, unavailable=0, scored=1, settled=0, awaiting_target_date=4, unreported_so_far=2
+        ),
+        ModelCounts(
+            SEASONAL_NAIVE_MODEL,
+            7,
+            unavailable=3,
+            scored=1,
+            settled=0,
+            awaiting_target_date=2,
+            unreported_so_far=1,
         ),
     ]
 
@@ -177,15 +190,15 @@ def test_scoring_uses_only_reported_actuals_and_records_the_vintage(conn):
 def test_rescoring_adds_nothing_and_a_revised_actual_adds_a_second_score(conn):
     forecast_baselines(conn, CUTOFF)
     receive(conn, 22, 3700, at(23, 7))
-    score_provisional(conn)
+    score_forecasts(conn, today=date(2026, 11, 23))
 
-    _, added_again = score_provisional(conn)
-    assert added_again == 0
+    _, again = score_forecasts(conn, today=date(2026, 11, 23))
+    assert again.provisional_added == 0
 
     receive(conn, 22, 3650, at(24, 7))  # the source edits 22/11
-    _, added_after_revision = score_provisional(conn)
+    _, after_revision = score_forecasts(conn, today=date(2026, 11, 24))
 
-    assert added_after_revision == 2
+    assert after_revision.provisional_added == 2
     naive_scores = conn.execute(
         "SELECT s.actual_price, s.error FROM forecast_scores s JOIN forecasts f USING (forecast_id) "
         "WHERE f.model_version = %s ORDER BY s.score_id",
@@ -193,3 +206,147 @@ def test_rescoring_adds_nothing_and_a_revised_actual_adds_a_second_score(conn):
     ).fetchall()
     # The first score (against 3700) is kept; the second uses the revised actual.
     assert naive_scores == [(3700, -200), (3650, -150)]
+
+
+def settled_scores(conn: psycopg.Connection) -> list[tuple]:
+    return conn.execute(
+        "SELECT f.model_version, s.actual_vintage_id, s.actual_price, s.error, s.settling_days "
+        "FROM forecast_scores s JOIN forecasts f USING (forecast_id) WHERE s.status = 'settled' ORDER BY 1"
+    ).fetchall()
+
+
+def provisional_score_count(conn: psycopg.Connection) -> int:
+    return conn.execute("SELECT count(*) FROM forecast_scores WHERE status = 'provisional'").fetchone()[0]
+
+
+def vintage_of(conn: psycopg.Connection, arrival_day: int, modal: int) -> int:
+    return conn.execute(
+        "SELECT vintage_id FROM price_vintages WHERE arrival_date = %s AND modal_price = %s",
+        (date(2026, 11, arrival_day), modal),
+    ).fetchone()[0]
+
+
+def test_a_score_is_settled_only_once_the_target_is_older_than_the_window(conn):
+    forecast_baselines(conn, CUTOFF)
+    receive(conn, 22, 3700, at(23, 7))
+
+    # Target 22/11 is 7 days old on 29/11: still inside the window, so only provisional scores.
+    _, result = score_forecasts(conn, today=date(2026, 11, 29))
+    assert result == ScoringResult(provisional_added=2, settled_added=0, revisions_recorded=0)
+    assert settled_scores(conn) == []
+
+    # On 30/11 it is 8 days old: settled, against the vintage known now.
+    _, result = score_forecasts(conn, today=date(2026, 11, 30))
+    assert result == ScoringResult(provisional_added=0, settled_added=2, revisions_recorded=0)
+    vintage_22 = vintage_of(conn, 22, 3700)
+    assert settled_scores(conn) == [
+        (NAIVE_MODEL, vintage_22, 3700, -200, 7),
+        (SEASONAL_NAIVE_MODEL, vintage_22, 3700, -600, 7),
+    ]
+
+    # Settled once: a re-run adds nothing.
+    _, result = score_forecasts(conn, today=date(2026, 11, 30))
+    assert result == ScoringResult(provisional_added=0, settled_added=0, revisions_recorded=0)
+
+
+def test_the_settling_window_is_configurable_and_recorded(conn):
+    forecast_baselines(conn, CUTOFF)
+    receive(conn, 22, 3700, at(23, 7))
+
+    _, result = score_forecasts(conn, today=date(2026, 11, 25), settling_days=2)
+
+    assert result.settled_added == 2
+    assert [row[4] for row in settled_scores(conn)] == [2, 2]
+
+
+def test_a_revised_settled_actual_is_recorded_as_an_event_and_the_score_is_kept(conn):
+    forecast_baselines(conn, CUTOFF)
+    receive(conn, 22, 3700, at(23, 7))
+    score_forecasts(conn, today=date(2026, 11, 30))
+    settled_before = settled_scores(conn)
+    provisional_before = provisional_score_count(conn)
+
+    receive(conn, 22, 3650, at(30, 9))  # the source edits 22/11 after it settled
+    _, result = score_forecasts(conn, today=date(2026, 11, 30))
+
+    assert result == ScoringResult(provisional_added=0, settled_added=0, revisions_recorded=2)
+    assert settled_scores(conn) == settled_before
+    assert provisional_score_count(conn) == provisional_before
+    events = conn.execute(
+        "SELECT f.model_version, r.revised_vintage_id, r.revised_price, r.revised_error "
+        "FROM settled_score_revisions r JOIN forecast_scores s USING (score_id) "
+        "JOIN forecasts f USING (forecast_id) ORDER BY 1"
+    ).fetchall()
+    vintage_revised = vintage_of(conn, 22, 3650)
+    assert events == [
+        (NAIVE_MODEL, vintage_revised, 3650, -150),
+        (SEASONAL_NAIVE_MODEL, vintage_revised, 3650, -550),
+    ]
+
+    # The same revision is recorded once.
+    _, result = score_forecasts(conn, today=date(2026, 12, 1))
+    assert result.revisions_recorded == 0
+
+
+def test_settled_scores_cannot_be_changed(conn):
+    forecast_baselines(conn, CUTOFF)
+    receive(conn, 22, 3700, at(23, 7))
+    score_forecasts(conn, today=date(2026, 11, 30))
+
+    with pytest.raises(psycopg.errors.RaiseException, match="append-only"):
+        conn.execute("UPDATE forecast_scores SET actual_price = 1 WHERE status = 'settled'")
+
+
+def test_lightgbm_forecasts_use_the_champion_and_only_what_was_seen_by_the_cutoff(conn, small_lgbm_models):
+    register_run = start_run(conn, "test")
+    register_model(
+        conn,
+        "lgbm.v1",
+        small_lgbm_models,
+        params={},
+        backtest_metrics={},
+        training_data_as_of=at(1, 0),
+        training_rows=1,
+        run_id=register_run,
+        promote=True,
+    )
+    conn.commit()
+
+    run_id, summary = forecast_lightgbm(conn, CUTOFF)
+
+    # What the pipeline had seen at the cutoff: not the 19/11 revision (3550) nor the late 20/11 row.
+    seen_by_cutoff = {
+        date(2026, 11, 14): 3000.0,
+        date(2026, 11, 15): 3100.0,
+        date(2026, 11, 17): 3300.0,
+        date(2026, 11, 18): 3400.0,
+        date(2026, 11, 19): 3500.0,
+    }
+    spreads = {day: 400 / price for day, price in seen_by_cutoff.items()}  # receive() stores modal +- 200
+    series_info = pd.DataFrame({"series_id": [1], "market": ["Barasat"], "crop": ["Tomato"]})
+    table = build_feature_table({1: seen_by_cutoff}, {1: spreads}, series_info, [date(2026, 11, 21)])
+    expected = predict_prices(small_lgbm_models, table).round(2).tolist()
+
+    stored = conn.execute(
+        "SELECT point_forecast, input_as_of_at, forecast_run_id FROM forecasts "
+        "WHERE model_version = 'lgbm.v1' ORDER BY horizon_days"
+    ).fetchall()
+    assert [float(row[0]) for row in stored] == expected
+    assert {(row[1], row[2]) for row in stored} == {(CUTOFF, run_id)}
+    assert (summary.forecasts_built, summary.forecasts_unavailable, summary.forecasts_inserted) == (7, 0, 7)
+
+    # Re-running the same day keeps the first forecasts.
+    _, again = forecast_lightgbm(conn, at(21, 18))
+    assert again.forecasts_inserted == 0
+
+
+def test_lightgbm_without_a_champion_fails_its_run_and_stores_nothing(conn):
+    with pytest.raises(RuntimeError, match="no champion"):
+        forecast_lightgbm(conn, CUTOFF)
+
+    status, error_message = conn.execute(
+        "SELECT status, error_message FROM pipeline_runs WHERE job_type = 'forecast'"
+    ).fetchone()
+    assert status == "failed"
+    assert "no champion" in error_message
+    assert conn.execute("SELECT count(*) FROM forecasts").fetchone()[0] == 0

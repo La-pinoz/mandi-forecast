@@ -33,7 +33,7 @@ from dotenv import load_dotenv
 from mandi.evaluate.metrics import mase, mean_absolute_error, seasonal_naive_scale, smape
 from mandi.ingest.snapshot import IST
 from mandi.models.baselines import HORIZONS_DAYS, SEASON_DAYS, baseline_forecasts
-from mandi.models.daily_forecast import prices_by_series
+from mandi.models.daily_forecast import prices_by_series, series_info_table
 from mandi.store.db import get_connection
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -45,13 +45,6 @@ MAX_HORIZON_DAYS = max(HORIZONS_DAYS)
 # Volatile (fixed before any results were seen): a target date whose absolute 7-day log price change is in the
 # top decile of that series' 7-day changes over its full history.
 VOLATILE_QUANTILE = 0.9
-
-SERIES_INFO = """
-SELECT series_id, market, commodity
-FROM series
-WHERE is_active
-ORDER BY series_id
-"""
 
 
 @dataclass
@@ -214,8 +207,7 @@ def load_inputs(
     """Prices of every active series as known at `as_of` (the latest history), and each series' market and
     crop."""
     prices = prices_by_series(conn, as_of)
-    series_info = pd.DataFrame(conn.execute(SERIES_INFO).fetchall(), columns=["series_id", "market", "crop"])
-    return prices, series_info
+    return prices, series_info_table(conn)
 
 
 def print_report(

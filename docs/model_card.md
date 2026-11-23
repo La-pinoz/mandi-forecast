@@ -1,6 +1,7 @@
 # Model card: lgbm.v1 (first draft, M08)
 
-**Status:** backtest only (2026-11-23). Not yet in the daily run (M09). **Backtest result: it does not beat
+**Status:** registered as champion in `model_registry` and in the daily run from M09 (2026-11-23); retrained
+on all data known on 2026-11-23 (71,653 rows). No live scores yet. **Backtest result: it does not beat
 the naive baseline.** All numbers below are from `docs/backtest_report.md`, LightGBM section.
 
 ## Model
@@ -13,7 +14,7 @@ the naive baseline.** All numbers below are from `docs/backtest_report.md`, Ligh
 | Target | log(price(target) / p_last), where p_last is the last price known at the origin. Forecast = p_last · exp(prediction) |
 | Objective | L1 (absolute error), so the prediction is a median |
 | Parameters | Fixed, not tuned: 300 trees, learning rate 0.05, 15 leaves, ≥ 50 rows per leaf, 80% of features per tree, seed 42 |
-| Code | `src/mandi/features/build.py`, `src/mandi/models/lgbm.py`, `src/mandi/evaluate/backtest_lgbm.py` |
+| Code | `src/mandi/features/build.py`, `src/mandi/models/lgbm.py`, `src/mandi/evaluate/backtest_lgbm.py`; live: `src/mandi/models/registry.py`, `register_lgbm.py`, `daily_forecast.py` |
 
 ## Intended use
 
