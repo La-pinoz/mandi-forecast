@@ -1,0 +1,299 @@
+state,district,market,commodity,variety,grade,first_date,last_date,days_reported,pct_days_reported,longest_gap_days,pct_week_ago_available,conflicting_days
+West Bengal,Paschim Bardhaman,Asansol,Onion,Nasik,FAQ,2023-01-01,2026-11-20,1055,96.3,2,96.9,1
+West Bengal,North 24 Parganas,Barasat,Onion,Other,FAQ,2023-01-01,2026-11-21,1054,96.2,3,96.5,0
+West Bengal,Hooghly,Champadanga,Onion,Nasik,FAQ,2023-01-01,2026-11-20,1035,94.4,39,97.8,1
+West Bengal,Hooghly,Kalipur,Onion,Nasik,FAQ,2023-01-01,2026-09-20,1029,93.9,62,99.5,3
+West Bengal,Medinipur(W),Medinipur(West),Onion,Onion,FAQ,2023-11-02,2026-11-20,963,87.9,6,88.8,0
+West Bengal,Hooghly,Sheoraphuly,Onion,Nasik,FAQ,2023-01-01,2026-11-20,960,87.6,61,95.3,0
+West Bengal,Bankura,Bankura Sadar,Onion,Nasik,FAQ,2023-01-01,2026-11-20,935,85.3,5,89.2,2
+West Bengal,Dakshin Dinajpur,Gangarampur(Dakshin Dinajpur),Onion,1st Sort,FAQ,2023-01-01,2026-11-20,905,82.6,41,86.2,0
+West Bengal,Puruliya,Balarampur,Onion,Other,FAQ,2023-01-01,2026-11-20,905,82.6,10,83.6,0
+West Bengal,Medinipur(E),Tamluk (Medinipur E),Onion,Onion,FAQ,2023-11-01,2026-11-20,900,82.1,5,86.7,0
+West Bengal,Medinipur(W),Garbeta(Medinipur),Onion,Onion,FAQ,2023-11-02,2026-11-20,891,81.3,17,86.1,0
+West Bengal,Purba Bardhaman,Kalna,Onion,Local,FAQ,2023-01-02,2026-11-21,879,80.2,46,90.9,0
+West Bengal,Puruliya,Purulia,Onion,Other,FAQ,2023-01-01,2026-11-20,858,78.3,115,88.5,0
+West Bengal,Nadia,Ranaghat,Onion,Other,FAQ,2023-01-01,2026-11-20,836,76.3,32,86.1,0
+West Bengal,Purba Bardhaman,Burdwan,Onion,Nasik,FAQ,2023-01-01,2026-11-21,802,73.2,12,75.6,0
+West Bengal,Alipurduar,Falakata,Onion,Other,FAQ,2023-01-02,2026-11-19,733,66.9,94,84.3,0
+West Bengal,North 24 Parganas,Habra,Onion,Other,FAQ,2023-01-01,2026-11-11,711,64.9,170,93.2,0
+West Bengal,Birbhum,Birbhum,Onion,Other,FAQ,2023-01-01,2026-11-21,698,63.7,117,85.2,1
+West Bengal,Birbhum,Bolpur,Onion,Onion,FAQ,2023-01-01,2026-11-21,696,63.5,119,83.9,0
+West Bengal,Jalpaiguri,Dhupguri,Onion,Nasik,FAQ,2024-05-13,2026-11-14,693,63.2,173,81.2,1
+West Bengal,Darjeeling,Darjeeling,Onion,Other,FAQ,2024-02-03,2026-06-14,691,63.0,160,94.2,0
+West Bengal,Darjeeling,Karsiyang(Matigara),Onion,Other,FAQ,2023-01-02,2025-11-08,689,62.9,378,97.4,0
+West Bengal,Darjeeling,Siliguri,Onion,Other,FAQ,2023-01-02,2026-07-19,685,62.5,138,96.4,0
+West Bengal,Nadia,Chakdah,Onion,Other,FAQ,2023-01-01,2026-10-26,681,62.1,128,87.1,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Other,FAQ,2023-01-01,2025-11-06,678,61.9,380,94.5,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Onion,Nasik,FAQ,2024-05-13,2026-11-16,674,61.5,173,79.5,1
+West Bengal,Purba Bardhaman,Kalna,Onion,Other,FAQ,2023-01-02,2026-08-23,668,60.9,163,89.7,0
+West Bengal,Howrah,Uluberia,Onion,Other,FAQ,2023-01-01,2026-05-13,666,60.8,192,91.9,1
+West Bengal,Kolkata,Bara Bazar (Posta Bazar),Onion,Nasik,FAQ,2023-01-02,2026-11-20,657,59.9,17,72.1,1
+West Bengal,Alipurduar,Alipurduar,Onion,Other,FAQ,2023-01-02,2025-11-06,654,59.7,380,92.0,0
+West Bengal,Medinipur(W),Ghatal,Onion,Onion,FAQ,2023-11-01,2026-11-21,647,59.0,243,83.5,1
+West Bengal,Murshidabad,Jangipur,Onion,Red,FAQ,2023-01-01,2025-11-06,645,58.9,380,90.2,0
+West Bengal,Nadia,Karimpur,Onion,Nasik,FAQ,2023-01-01,2026-09-02,625,57.0,114,86.1,0
+West Bengal,Medinipur(E),Egra/contai,Onion,Onion,FAQ,2023-01-01,2026-02-09,620,56.6,285,83.1,0
+West Bengal,Nadia,Kalyani,Onion,Onion,FAQ,2023-01-02,2025-11-04,619,56.5,382,89.7,0
+West Bengal,Paschim Bardhaman,Durgapur,Onion,Nasik,FAQ,2025-02-17,2026-11-20,599,54.7,453,93.2,1
+West Bengal,Sounth 24 Parganas,Baruipur(Canning),Onion,Other,FAQ,2023-01-02,2025-11-06,599,54.7,380,90.8,6
+West Bengal,Malda,Samsi,Onion,Onion,FAQ,2023-02-01,2025-11-05,594,54.2,381,82.7,7
+West Bengal,Hooghly,Pandua,Onion,Dry F.A.Q.,FAQ,2025-03-21,2026-11-21,591,53.9,485,95.6,0
+West Bengal,Birbhum,Sainthia,Onion,Onion,FAQ,2024-12-06,2026-11-21,584,53.3,380,84.4,0
+West Bengal,Bankura,Bishnupur(Bankura),Onion,Nasik,FAQ,2023-01-01,2026-11-21,576,52.6,245,96.5,2
+West Bengal,Malda,English Bazar,Onion,Other,FAQ,2023-01-01,2025-11-05,569,51.9,381,86.8,1
+West Bengal,Jalpaiguri,Moynaguri,Onion,Nasik,FAQ,2024-05-13,2026-11-13,559,51.0,173,80.5,1
+West Bengal,Purba Bardhaman,Katwa,Onion,Other,FAQ,2023-01-02,2025-11-06,552,50.4,380,93.1,0
+West Bengal,Jalpaiguri,Belacoba,Onion,Nasik,FAQ,2024-05-13,2026-11-14,523,47.7,173,79.0,1
+West Bengal,Sounth 24 Parganas,Diamond Harbour(South 24-pgs),Onion,Red,FAQ,2023-01-02,2026-11-19,517,47.2,223,81.4,0
+West Bengal,Malda,Gajol,Onion,Other,FAQ,2023-01-31,2025-11-03,500,45.6,383,73.2,0
+West Bengal,Puruliya,Kasipur,Onion,Other,FAQ,2023-01-01,2026-11-20,475,43.3,48,49.5,0
+West Bengal,Hooghly,Pandua,Onion,Nasik,FAQ,2023-01-01,2025-03-20,459,41.9,611,94.3,2
+West Bengal,Dakshin Dinajpur,Balurghat,Onion,1st Sort,FAQ,2024-04-27,2026-11-20,455,41.5,233,75.4,0
+West Bengal,Paschim Bardhaman,Durgapur,Onion,Other,FAQ,2023-01-01,2025-02-17,446,40.7,642,98.2,0
+West Bengal,Bankura,Bishnupur(Bankura),Onion,Nasik,Non-FAQ,2025-01-20,2026-06-30,443,40.4,425,93.5,1
+West Bengal,Coochbehar,Coochbehar,Onion,Other,FAQ,2024-03-27,2025-11-04,421,38.4,382,79.3,0
+West Bengal,Nadia,Nadia,Onion,Other,FAQ,2023-01-01,2026-05-05,393,35.9,423,87.5,0
+West Bengal,Sounth 24 Parganas,Baruipur(Canning),Onion,Red,FAQ,2025-11-07,2026-11-21,375,34.2,716,96.8,2
+West Bengal,Darjeeling,Karsiyang(Matigara),Onion,Nasik,FAQ,2025-11-06,2026-11-21,368,33.6,715,94.8,0
+West Bengal,Birbhum,Rampurhat,Onion,Other,FAQ,2024-03-04,2026-11-20,365,33.3,230,68.2,0
+West Bengal,Kolkata,Bara Bazar (Posta Bazar),Onion,Other,FAQ,2023-01-03,2026-11-20,358,32.7,132,60.3,0
+West Bengal,Darjeeling,Siliguri,Onion,Onion,FAQ,2025-11-06,2026-11-21,357,32.6,715,96.4,0
+West Bengal,Nadia,Bethuadahari,Onion,Dry F.A.Q.,FAQ,2023-01-01,2025-03-06,353,32.2,625,75.9,0
+West Bengal,North 24 Parganas,Habra,Onion,Onion,FAQ,2025-11-10,2026-11-20,346,31.6,719,91.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Nasik,FAQ,2025-11-11,2026-11-20,331,30.2,720,91.2,0
+West Bengal,Murshidabad,Jangipur,Onion,Bellary,FAQ,2025-11-11,2026-11-20,323,29.5,720,88.2,0
+West Bengal,Malda,Samsi,Onion,Nasik,FAQ,2025-11-10,2026-11-21,320,29.2,719,86.2,0
+West Bengal,Nadia,Nadia,Onion,Nasik,FAQ,2025-03-08,2026-11-19,319,29.1,472,79.6,0
+West Bengal,Sounth 24 Parganas,Diamond Harbour(South 24-pgs),Onion,Onion,FAQ,2025-05-06,2026-07-12,311,28.4,531,78.8,0
+West Bengal,Uttar Dinajpur,Islampur,Onion,Dry F.A.Q.,FAQ,2025-11-12,2026-11-21,300,27.4,721,79.7,0
+West Bengal,Coochbehar,Mekhliganj,Onion,Other,FAQ,2023-01-01,2025-07-02,279,25.5,507,56.3,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Onion,Other,FAQ,2023-01-01,2026-11-20,280,25.5,521,78.6,0
+West Bengal,Nadia,Bethuadahari,Onion,Nasik,Grade A,2025-11-10,2026-11-21,274,25.0,719,83.9,0
+West Bengal,Coochbehar,Dinhata,Onion,Onion,FAQ,2023-01-02,2025-05-19,269,24.5,551,52.8,0
+West Bengal,Jalpaiguri,Belacoba,Onion,Other,FAQ,2023-01-01,2026-11-18,269,24.5,538,79.6,0
+West Bengal,Birbhum,Rampurhat,Onion,Local,FAQ,2023-01-12,2025-11-06,267,24.4,380,70.4,1
+West Bengal,Nadia,Karimpur,Onion,Nasik,Grade A,2025-11-10,2026-11-20,267,24.4,719,83.1,0
+West Bengal,Jalpaiguri,Moynaguri,Onion,Other,FAQ,2023-01-01,2026-11-20,265,24.2,521,78.1,0
+West Bengal,Paschim Bardhaman,Asansol,Onion,Nasik,Non-FAQ,2025-02-08,2025-11-06,264,24.1,444,94.3,0
+West Bengal,Birbhum,Rampurhat,Onion,Nasik,FAQ,2023-01-01,2025-05-30,262,23.9,540,73.7,0
+West Bengal,Howrah,Uluberia,Onion,Nasik,FAQ,2025-12-02,2026-09-15,257,23.4,741,86.4,0
+West Bengal,Birbhum,Sainthia,Onion,Nasik,FAQ,2023-01-01,2024-12-30,250,22.8,691,76.4,7
+West Bengal,Birbhum,Birbhum,Onion,Nasik,FAQ,2023-01-15,2025-02-14,248,22.6,645,81.5,8
+West Bengal,Paschim Bardhaman,Durgapur,Onion,Nasik,Non-FAQ,2025-02-17,2025-11-06,247,22.5,453,92.7,0
+West Bengal,Alipurduar,Alipurduar,Onion,Onion,FAQ,2025-11-08,2026-11-19,241,22.0,717,65.6,0
+West Bengal,Birbhum,Bolpur,Onion,Nasik,FAQ,2023-11-23,2025-02-19,235,21.4,640,77.0,0
+West Bengal,Purba Bardhaman,Katwa,Onion,Onion,FAQ,2025-11-07,2026-10-25,232,21.2,716,77.2,0
+West Bengal,Malda,Gajol,Onion,Nasik,FAQ,2025-11-11,2026-11-17,197,18.0,720,60.4,0
+West Bengal,Nadia,Kalyani,Onion,Other,Medium,2025-12-07,2026-11-17,170,15.5,746,71.2,0
+West Bengal,Uttar Dinajpur,Raiganj,Onion,Nasik,FAQ,2025-08-20,2026-11-21,169,15.4,637,39.6,0
+West Bengal,Jalpaiguri,Dhupguri,Onion,Onion,FAQ,2023-01-01,2024-05-14,154,14.1,921,90.3,0
+West Bengal,Nadia,Bethuadahari,Onion,Nasik,FAQ,2025-03-23,2026-09-02,155,14.1,487,76.8,1
+West Bengal,Coochbehar,Pundibari,Onion,Other,FAQ,2024-05-19,2025-11-04,151,13.8,382,68.2,0
+West Bengal,Medinipur(W),Ghatal,Onion,Onion,Medium,2026-02-18,2026-10-18,146,13.3,819,64.4,0
+West Bengal,Malda,English Bazar,Onion,Local,FAQ,2023-02-02,2024-09-06,131,12.0,806,88.5,0
+West Bengal,Jalpaiguri,Dhupguri,Onion,Other,FAQ,2024-09-26,2026-11-21,128,11.7,312,65.6,0
+West Bengal,Hooghly,Sheoraphuly,Onion,Local,FAQ,2023-02-23,2026-05-18,120,10.9,494,84.2,0
+West Bengal,Hooghly,Kalipur(Arambagh Krishak Bazar)APMC,Onion,Nasik,FAQ,2026-08-01,2026-11-21,112,10.2,983,92.9,0
+West Bengal,Howrah,Nimdhighi Market,Onion,Nasik,FAQ,2026-08-02,2026-11-20,105,9.6,984,88.6,0
+West Bengal,Nadia,Nadia,Onion,Local,FAQ,2025-04-09,2026-06-08,105,9.6,504,69.5,2
+West Bengal,Coochbehar,Pundibari,Onion,1st Sort,FAQ,2023-01-01,2024-05-15,103,9.4,920,75.7,0
+West Bengal,Birbhum,Sainthia,Onion,Other,FAQ,2023-01-12,2024-12-08,98,8.9,713,55.1,0
+West Bengal,Nadia,Chakdah,Onion,Onion,FAQ,2026-05-05,2026-11-20,97,8.9,895,62.9,0
+West Bengal,Malda,English Bazar,Onion,Nasik,FAQ,2026-02-02,2026-09-30,91,8.3,803,58.2,0
+West Bengal,Purba Bardhaman,Kalna,Onion,Nasik,FAQ,2026-08-21,2026-11-21,84,7.7,1003,86.9,0
+West Bengal,Nadia,Bethuadahari,Onion,Local,FAQ,2025-04-07,2026-06-06,73,6.7,502,82.2,0
+West Bengal,Nadia,Kalyani,Onion,Onion,Local,2025-12-02,2026-08-26,66,6.0,741,65.2,0
+West Bengal,Bankura,Bankura Sadar,Onion,Other,FAQ,2024-11-23,2025-05-12,62,5.7,558,79.0,0
+West Bengal,Birbhum,Bishnupur,Onion,Nasik,Non-FAQ,2025-11-15,2026-01-13,60,5.5,724,88.3,0
+West Bengal,Nadia,Karimpur,Onion,Local,Grade A,2026-02-10,2026-10-21,58,5.3,811,58.6,0
+West Bengal,Hooghly,Kalipur(Arambagh Kishak Bazar)APMC,Onion,Nasik,FAQ,2026-08-01,2026-09-22,53,4.8,983,86.8,0
+West Bengal,Hooghly,Kalipur(Arambagh)APMC,Onion,Nasik,FAQ,2026-08-01,2026-09-22,53,4.8,983,86.8,0
+West Bengal,Nadia,Bethuadahari,Onion,Local,Grade A,2026-03-08,2026-09-06,51,4.7,837,54.9,0
+West Bengal,Nadia,Bethuadahari,Onion,Dry F.A.Q.,Non-FAQ,2025-01-17,2025-03-04,47,4.3,627,85.1,0
+West Bengal,Nadia,Nadia,Onion,Other,Non-FAQ,2025-01-17,2025-03-02,44,4.0,629,81.8,0
+West Bengal,Nadia,Kalyani,Onion,Other,Local,2025-11-09,2026-11-20,37,3.4,718,35.1,0
+West Bengal,Hooghly,Champadanga,Onion,Other,FAQ,2026-04-07,2026-05-14,35,3.2,867,74.3,0
+West Bengal,Nadia,Karimpur,Onion,Nasik,Non-FAQ,2025-01-21,2025-02-21,28,2.6,638,71.4,0
+West Bengal,Medinipur(W),Ghatal,Onion,Onion,Local,2026-02-08,2026-06-16,25,2.3,809,48.0,0
+West Bengal,Uttar Dinajpur,Raiganj,Onion,Other,FAQ,2025-07-31,2026-05-23,21,1.9,617,14.3,0
+West Bengal,Alipurduar,Falakata,Onion,Other,Non-FAQ,2025-01-19,2025-09-23,19,1.7,424,47.4,0
+West Bengal,Puruliya,Balarampur,Onion,Other,Local,2025-12-16,2026-06-07,15,1.4,755,0.0,0
+West Bengal,Alipurduar,Alipurduar,Onion,Other,Non-FAQ,2025-01-19,2025-09-24,14,1.3,424,35.7,0
+West Bengal,Nadia,Bethuadahari,Onion,Other,FAQ,2025-03-08,2025-03-22,14,1.3,609,50.0,0
+West Bengal,Nadia,Karimpur,Onion,Local,FAQ,2026-05-12,2026-06-06,11,1.0,902,45.5,0
+West Bengal,Paschim Bardhaman,Durgapur,Onion,Other,Non-FAQ,2025-02-07,2025-02-17,11,1.0,642,36.4,0
+West Bengal,Bankura,Bankura Sadar,Onion,Nasik,Non-FAQ,2025-02-24,2025-08-22,10,0.9,460,10.0,0
+West Bengal,Malda,Gajol,Onion,Local,FAQ,2024-05-27,2026-01-09,10,0.9,316,0.0,0
+West Bengal,Bankura,Bankura Sadar,Onion,Medium,FAQ,2023-07-19,2025-10-25,9,0.8,413,0.0,0
+West Bengal,Hooghly,Pandua,Onion,Nasik,Non-FAQ,2025-03-03,2025-03-11,9,0.8,620,22.2,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Other,Local,2025-11-13,2025-12-01,9,0.8,722,44.4,0
+West Bengal,Nadia,Kalyani,Onion,Onion,Medium,2025-12-03,2026-03-31,9,0.8,742,11.1,0
+West Bengal,Howrah,Uluberia,Onion,Other,Grade A,2025-11-10,2025-11-24,8,0.7,719,25.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Other,Non-FAQ,2025-04-02,2025-08-06,7,0.6,497,28.6,0
+West Bengal,Medinipur(W),Medinipur(West),Onion,Nasik,FAQ,2023-01-05,2026-10-15,7,0.6,740,0.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Other,Grade A,2025-11-09,2025-11-24,5,0.5,718,20.0,0
+West Bengal,Howrah,Uluberia,Onion,Other,Local,2025-11-18,2025-11-28,4,0.4,727,25.0,0
+West Bengal,North 24 Parganas,Barasat,Onion,Local,FAQ,2025-11-24,2025-12-11,4,0.4,733,25.0,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Onion,Onion,FAQ,2026-09-25,2026-11-19,3,0.3,1038,0.0,0
+West Bengal,Birbhum,Bolpur,Onion,Other,FAQ,2025-11-07,2025-11-12,2,0.2,716,0.0,0
+West Bengal,Birbhum,Rampurhat,Onion,Onion,FAQ,2026-03-30,2026-08-25,2,0.2,859,0.0,0
+West Bengal,Coochbehar,Coochbehar,Onion,Other,Non-FAQ,2025-06-10,2025-06-29,2,0.2,566,0.0,0
+West Bengal,Kolkata,Bara Bazar (Posta Bazar),Onion,Other,Non-FAQ,2025-05-23,2025-09-03,2,0.2,548,0.0,0
+West Bengal,Malda,English Bazar,Onion,Local,Non-FAQ,2025-06-11,2025-07-20,2,0.2,567,0.0,0
+West Bengal,Nadia,Nadia,Onion,Nasik,Grade A,2026-02-21,2026-02-22,2,0.2,822,0.0,0
+West Bengal,Purba Bardhaman,Kalna,Onion,Other,Non-FAQ,2025-01-25,2025-02-05,2,0.2,654,0.0,0
+West Bengal,Bankura,Bishnupur(Bankura),Onion,Big,Non-FAQ,2026-06-04,2026-06-04,1,0.1,925,0.0,0
+West Bengal,Bankura,Bishnupur(Bankura),Onion,Nasik,Local,2026-05-09,2026-05-09,1,0.1,899,0.0,0
+West Bengal,Birbhum,Bishnupur,Onion,Nasik,FAQ,2025-11-13,2025-11-13,1,0.1,722,0.0,0
+West Bengal,Birbhum,Bishnupur,Onion,Nasik,Large,2025-11-12,2025-11-12,1,0.1,721,0.0,0
+West Bengal,Birbhum,Bishnupur,Onion,Nasik,Medium,2025-11-14,2025-11-14,1,0.1,723,0.0,0
+West Bengal,Birbhum,Rampurhat,Onion,Other,Grade B,2026-05-20,2026-05-20,1,0.1,910,0.0,0
+West Bengal,Hooghly,Kalipur,Onion,Nasik,Non-FAQ,2025-07-27,2025-07-27,1,0.1,613,0.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Onion,FAQ,2025-11-10,2025-11-10,1,0.1,719,0.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Onion,Onion,Grade A,2025-11-21,2025-11-21,1,0.1,730,0.0,0
+West Bengal,Howrah,Uluberia,Onion,Nasik,Grade A,2026-03-11,2026-03-11,1,0.1,840,0.0,0
+West Bengal,Howrah,Uluberia,Onion,Other,Grade B,2025-11-13,2025-11-13,1,0.1,722,0.0,0
+West Bengal,Howrah,Uluberia,Onion,Other,Medium,2025-11-12,2025-11-12,1,0.1,721,0.0,0
+West Bengal,Malda,Samsi,Onion,Local,FAQ,2026-02-15,2026-02-15,1,0.1,816,0.0,0
+West Bengal,Medinipur(E),Tamluk (Medinipur E),Onion,Other,FAQ,2023-01-02,2025-11-13,1,0.1,722,0.0,0
+West Bengal,Medinipur(W),Medinipur(West),Onion,Onion,Grade A,2026-07-15,2026-07-15,1,0.1,966,0.0,0
+West Bengal,Nadia,Bethuadahari,Onion,Local,Grade Range-1,2026-04-09,2026-04-09,1,0.1,869,0.0,0
+West Bengal,Nadia,Kalyani,Onion,Onion,Non-FAQ,2025-01-17,2025-01-17,1,0.1,673,0.0,0
+West Bengal,North 24 Parganas,Habra,Onion,Medium,FAQ,2026-09-06,2026-09-06,1,0.1,1019,0.0,0
+West Bengal,Paschim Bardhaman,Durgapur,Onion,Nasik,Grade A,2026-03-01,2026-03-01,1,0.1,830,0.0,0
+West Bengal,Purba Bardhaman,Burdwan,Onion,Nasik,Non-FAQ,2025-02-23,2025-02-23,1,0.1,636,0.0,0
+West Bengal,Purba Bardhaman,Kalna,Onion,Local,Grade A,2026-03-09,2026-03-09,1,0.1,838,0.0,0
+West Bengal,Purba Bardhaman,Kalna,Onion,Local,Non-FAQ,2025-06-06,2025-06-06,1,0.1,562,0.0,0
+West Bengal,Sounth 24 Parganas,Baruipur(Canning),Onion,Other,Non-FAQ,2025-02-15,2025-02-15,1,0.1,644,0.0,0
+West Bengal,Uttar Dinajpur,Islampur,Onion,Dry F.A.Q.,Grade A,2026-09-15,2026-09-15,1,0.1,1028,0.0,0
+West Bengal,Birbhum,Rampurhat,Onion,Bangalore-Samall,FAQ,2023-03-26,2023-03-26,0,0.0,1096,0.0,0
+West Bengal,Coochbehar,Baxirhat,Onion,Other,FAQ,2023-08-19,2023-10-29,0,0.0,1096,0.0,0
+West Bengal,Hooghly,Pandua,Onion,Local,FAQ,2023-02-23,2023-03-04,0,0.0,1096,0.0,0
+West Bengal,Medinipur(E),Tamluk (Medinipur E),Onion,Big,FAQ,2023-01-02,2023-10-31,0,0.0,1096,0.0,0
+West Bengal,Medinipur(W),Garbeta(Medinipur),Onion,Other,FAQ,2023-11-01,2023-11-01,0,0.0,1096,0.0,0
+West Bengal,Medinipur(W),Ghatal,Onion,Other,FAQ,2023-01-01,2023-10-31,0,0.0,1096,0.0,0
+West Bengal,North 24 Parganas,Barasat,Tomato,Other,FAQ,2023-01-01,2026-11-21,1059,96.6,3,96.9,0
+West Bengal,North 24 Parganas,Habra,Tomato,Other,FAQ,2023-01-01,2026-11-20,1057,96.4,4,96.5,0
+West Bengal,Kolkata,Sealdah Koley Market,Tomato,Other,FAQ,2023-01-01,2026-11-21,1053,96.1,3,96.0,0
+West Bengal,Paschim Bardhaman,Asansol,Tomato,Hybrid,FAQ,2023-01-01,2026-11-20,1051,95.9,2,96.5,7
+West Bengal,Darjeeling,Karsiyang(Matigara),Tomato,Other,FAQ,2023-01-02,2026-11-21,1046,95.4,5,96.2,1
+West Bengal,Paschim Bardhaman,Durgapur,Tomato,Hybrid,FAQ,2023-01-01,2026-11-20,1042,95.1,4,95.8,6
+West Bengal,Darjeeling,Darjeeling,Tomato,Other,FAQ,2024-02-03,2026-11-21,987,90.1,73,95.7,0
+West Bengal,Medinipur(W),Medinipur(West),Tomato,Tomato,FAQ,2023-11-02,2026-11-20,959,87.5,6,88.8,0
+West Bengal,Dakshin Dinajpur,Gangarampur(Dakshin Dinajpur),Tomato,Other,FAQ,2023-01-01,2026-11-20,937,85.5,5,86.2,0
+West Bengal,Howrah,Uluberia,Tomato,Other,FAQ,2023-01-01,2026-09-15,909,82.9,67,90.6,0
+West Bengal,Birbhum,Birbhum,Tomato,Hybrid,FAQ,2023-11-23,2026-11-21,894,81.6,18,86.8,8
+West Bengal,Medinipur(W),Garbeta(Medinipur),Tomato,Tomato,FAQ,2023-11-02,2026-11-20,890,81.2,17,85.8,0
+West Bengal,Nadia,Ranaghat,Tomato,Other,FAQ,2023-01-01,2026-11-20,835,76.2,32,85.9,0
+West Bengal,Sounth 24 Parganas,Diamond Harbour(South 24-pgs),Tomato,Tomato,FAQ,2023-01-02,2026-11-19,828,75.5,32,83.7,0
+West Bengal,Hooghly,Pandua,Tomato,Hybrid,FAQ,2023-01-01,2026-11-21,797,72.7,145,93.4,1
+West Bengal,Medinipur(E),Egra/contai,Tomato,Tomato,FAQ,2023-11-02,2026-11-20,757,69.1,23,79.1,0
+West Bengal,Alipurduar,Falakata,Tomato,Other,FAQ,2023-01-02,2026-11-19,736,67.2,94,84.0,0
+West Bengal,Puruliya,Balarampur,Tomato,Other,FAQ,2023-01-01,2026-11-20,694,63.3,91,81.8,0
+West Bengal,Birbhum,Bolpur,Tomato,Hybrid,FAQ,2023-12-06,2026-11-21,693,63.2,156,79.2,1
+West Bengal,Hooghly,Champadanga,Tomato,Hybrid,FAQ,2023-05-13,2026-11-20,690,63.0,162,92.9,3
+West Bengal,Howrah,Ramkrishanpur(Howrah),Tomato,Other,FAQ,2023-01-01,2026-07-10,682,62.2,191,94.1,0
+West Bengal,Darjeeling,Siliguri,Tomato,Hybrid,FAQ,2023-01-02,2026-01-05,681,62.1,320,96.2,0
+West Bengal,Purba Bardhaman,Kalna,Tomato,Other,FAQ,2023-01-02,2025-11-28,679,62.0,358,94.4,0
+West Bengal,Alipurduar,Alipurduar,Tomato,Other,FAQ,2023-01-02,2026-10-11,665,60.7,164,91.1,0
+West Bengal,Hooghly,Sheoraphuly,Tomato,Other,FAQ,2023-01-01,2026-05-11,630,57.5,194,92.9,1
+West Bengal,Birbhum,Sainthia,Tomato,Hybrid,FAQ,2023-08-09,2026-11-21,616,56.2,158,81.2,4
+West Bengal,Hooghly,Kalipur,Tomato,Hybrid,FAQ,2023-05-13,2026-09-20,576,52.6,162,95.3,6
+West Bengal,Bankura,Khatra,Tomato,Tomato,FAQ,2023-01-01,2026-11-21,575,52.5,228,97.6,0
+West Bengal,Dakshin Dinajpur,Balurghat,Tomato,Other,FAQ,2023-01-03,2026-11-20,569,51.9,256,74.5,0
+West Bengal,Nadia,Chakdah,Tomato,Hybrid,FAQ,2023-01-01,2026-07-21,551,50.3,257,90.2,0
+West Bengal,Coochbehar,Coochbehar,Tomato,Other,FAQ,2023-01-01,2025-11-04,516,47.1,382,80.2,0
+West Bengal,Bankura,Khatra,Tomato,Tomato,Non-FAQ,2025-01-20,2026-06-30,505,46.1,425,94.9,1
+West Bengal,Medinipur(W),Ghatal,Tomato,Hybrid,FAQ,2023-10-11,2026-11-21,476,43.4,516,84.7,1
+West Bengal,Jalpaiguri,Moynaguri,Tomato,Other,FAQ,2023-01-05,2026-11-20,471,43.0,224,80.3,0
+West Bengal,Hooghly,Kalipur,Tomato,Deshi,FAQ,2023-01-01,2026-05-19,453,41.3,250,93.4,2
+West Bengal,Hooghly,Sheoraphuly,Tomato,Hybrid,FAQ,2025-06-21,2026-11-20,418,38.1,577,90.0,0
+West Bengal,Jalpaiguri,Dhupguri,Tomato,Other,FAQ,2023-01-01,2026-11-21,404,36.9,304,76.0,0
+West Bengal,Purba Bardhaman,Burdwan,Tomato,Other,FAQ,2023-01-01,2025-12-15,384,35.0,341,60.9,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Tomato,Other,FAQ,2023-01-01,2026-11-04,381,34.8,304,78.2,0
+West Bengal,Hooghly,Champadanga,Tomato,Deshi,FAQ,2023-01-01,2026-05-12,380,34.7,193,87.6,1
+West Bengal,Darjeeling,Siliguri,Tomato,Tomato,FAQ,2025-11-06,2026-11-21,369,33.7,715,94.9,0
+West Bengal,Purba Bardhaman,Memari,Tomato,Other,FAQ,2023-01-03,2025-12-10,362,33.0,346,58.6,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Tomato,Tomato,FAQ,2025-11-10,2026-11-20,314,28.6,719,88.2,0
+West Bengal,Purba Bardhaman,Kalna,Tomato,Tomato,FAQ,2025-11-07,2026-11-21,292,26.6,716,76.4,0
+West Bengal,Sounth 24 Parganas,Baruipur(Canning),Tomato,Tomato,FAQ,2026-02-02,2026-11-21,290,26.5,803,96.6,0
+West Bengal,Malda,Gajol,Tomato,Other,FAQ,2024-08-06,2026-11-15,280,25.5,258,57.9,1
+West Bengal,Jalpaiguri,Belacoba,Tomato,Other,FAQ,2023-06-22,2026-11-20,259,23.6,352,78.0,0
+West Bengal,Purba Bardhaman,Burdwan,Tomato,Tomato,FAQ,2025-11-10,2026-11-21,251,22.9,719,69.7,0
+West Bengal,Birbhum,Sainthia,Tomato,Deshi,FAQ,2023-01-01,2025-01-19,249,22.7,671,73.1,6
+West Bengal,Hooghly,Pandua,Tomato,Deshi,FAQ,2025-01-16,2026-06-07,249,22.7,421,91.2,0
+West Bengal,Purba Bardhaman,Memari,Tomato,Tomato,FAQ,2025-11-10,2026-11-21,240,21.9,719,67.5,0
+West Bengal,Alipurduar,Alipurduar,Tomato,Tomato,FAQ,2025-11-08,2026-11-19,236,21.5,717,64.0,0
+West Bengal,Medinipur(W),Ghatal,Tomato,Local,FAQ,2025-01-22,2025-11-06,226,20.6,427,81.4,0
+West Bengal,Nadia,Chakdah,Tomato,Other,FAQ,2025-11-10,2026-11-20,222,20.3,719,67.6,0
+West Bengal,Puruliya,Balarampur,Tomato,Other,Local,2025-11-12,2026-08-24,223,20.3,721,81.6,1
+West Bengal,Coochbehar,Coochbehar,Tomato,Tomato,FAQ,2026-01-04,2026-10-07,190,17.3,774,66.8,0
+West Bengal,Jalpaiguri,Moynaguri,Tomato,Local,FAQ,2024-05-15,2026-04-21,186,17.0,254,72.6,0
+West Bengal,Coochbehar,Pundibari,Tomato,Tomato,FAQ,2026-01-05,2026-10-07,184,16.8,775,65.2,0
+West Bengal,Coochbehar,Mekhliganj,Tomato,Other,FAQ,2023-04-01,2025-04-22,171,15.6,578,51.5,0
+West Bengal,Jalpaiguri,Dhupguri,Tomato,Deshi,FAQ,2024-07-09,2026-04-18,158,14.4,268,69.6,0
+West Bengal,Paschim Bardhaman,Asansol,Tomato,Hybrid,Non-FAQ,2025-06-02,2025-11-06,150,13.7,558,90.0,0
+West Bengal,Paschim Bardhaman,Durgapur,Tomato,Hybrid,Non-FAQ,2025-06-02,2025-11-06,146,13.3,558,89.0,0
+West Bengal,Coochbehar,Pundibari,Tomato,Deshi,FAQ,2023-01-01,2024-05-17,141,12.9,918,75.9,0
+West Bengal,Coochbehar,Toofanganj,Tomato,Other,FAQ,2023-07-22,2025-03-06,140,12.8,625,46.4,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Tomato,Local,FAQ,2024-07-10,2026-04-14,126,11.5,267,67.5,0
+West Bengal,Jalpaiguri,Dhupguri,Tomato,Tomato,FAQ,2025-12-24,2026-11-20,116,10.6,763,60.3,0
+West Bengal,Hooghly,Kalipur(Arambagh Krishak Bazar)APMC,Tomato,Hybrid,FAQ,2026-08-01,2026-11-21,112,10.2,983,92.9,0
+West Bengal,Howrah,Nimdhighi Market,Tomato,Other,FAQ,2026-08-02,2026-11-20,106,9.7,984,89.6,0
+West Bengal,Coochbehar,Toofanganj,Tomato,Local,FAQ,2023-01-03,2025-04-21,104,9.5,579,38.5,0
+West Bengal,Birbhum,Bolpur,Tomato,Deshi,FAQ,2023-11-30,2024-09-28,102,9.3,784,61.8,0
+West Bengal,Puruliya,Purulia,Tomato,Other,FAQ,2023-01-01,2026-11-20,101,9.2,945,73.3,0
+West Bengal,Coochbehar,Dinhata,Tomato,Other,FAQ,2023-08-25,2025-03-02,99,9.0,629,36.4,0
+West Bengal,Jalpaiguri,Belacoba,Tomato,Local,FAQ,2024-07-09,2025-04-21,97,8.9,579,72.2,0
+West Bengal,Birbhum,Bolpur,Tomato,Tomato,FAQ,2023-02-24,2026-06-06,95,8.7,168,26.3,1
+West Bengal,Jalpaiguri,Belacoba,Tomato,Hybrid,FAQ,2023-06-23,2024-02-21,87,7.9,1004,94.3,0
+West Bengal,Coochbehar,Pundibari,Tomato,Local,FAQ,2024-05-18,2025-11-04,78,7.1,382,55.1,0
+West Bengal,Medinipur(W),Ghatal,Tomato,Hybrid,Local,2026-03-11,2026-06-19,78,7.1,840,73.1,0
+West Bengal,Puruliya,Kasipur,Tomato,Other,FAQ,2025-11-10,2026-11-20,74,6.8,719,17.6,0
+West Bengal,Coochbehar,Dinhata,Tomato,Deshi,FAQ,2023-09-14,2025-04-19,65,5.9,581,24.6,0
+West Bengal,Coochbehar,Haldibari,Tomato,Tomato,FAQ,2023-01-01,2024-05-10,57,5.2,925,82.5,0
+West Bengal,Hooghly,Kalipur(Arambagh Kishak Bazar)APMC,Tomato,Hybrid,FAQ,2026-08-01,2026-09-22,53,4.8,983,86.8,0
+West Bengal,Hooghly,Kalipur(Arambagh)APMC,Tomato,Hybrid,FAQ,2026-08-01,2026-09-22,53,4.8,983,86.8,0
+West Bengal,Medinipur(E),Egra/contai,Tomato,Deshi,FAQ,2023-01-01,2026-03-30,42,3.8,792,57.1,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Tomato,Tomato,FAQ,2025-12-23,2026-11-18,37,3.4,762,24.3,0
+West Bengal,Purba Bardhaman,Katwa,Tomato,Other,FAQ,2026-09-21,2026-11-21,37,3.4,1034,56.8,0
+West Bengal,Coochbehar,Baxirhat,Tomato,Local,FAQ,2023-01-01,2024-04-15,36,3.3,950,66.7,0
+West Bengal,Kolkata,Sealdah Koley Market,Tomato,Other,Non-FAQ,2025-01-20,2025-02-16,28,2.6,643,75.0,0
+West Bengal,Malda,English Bazar,Tomato,Tomato,FAQ,2026-06-01,2026-09-30,20,1.8,922,15.0,0
+West Bengal,Malda,English Bazar,Tomato,Local,FAQ,2026-02-02,2026-03-27,19,1.7,803,36.8,0
+West Bengal,Alipurduar,Alipurduar,Tomato,Hybrid,FAQ,2024-09-22,2025-08-19,11,1.0,459,0.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Tomato,Other,Local,2025-11-09,2025-12-02,11,1.0,718,45.5,0
+West Bengal,Malda,English Bazar,Tomato,Other,FAQ,2024-08-02,2024-08-14,11,1.0,829,36.4,0
+West Bengal,Kalimpong,Kalimpong,Tomato,Deshi,Medium,2025-11-16,2026-06-26,10,0.9,725,0.0,7
+West Bengal,Hooghly,Pandua,Tomato,Deshi,Non-FAQ,2025-03-03,2025-03-11,9,0.8,620,22.2,0
+West Bengal,Howrah,Uluberia,Tomato,Other,Local,2025-11-13,2025-12-12,9,0.8,722,44.4,0
+West Bengal,Birbhum,Sainthia,Tomato,Local,FAQ,2023-01-04,2024-10-11,6,0.5,771,0.0,0
+West Bengal,Howrah,Ramkrishanpur(Howrah),Tomato,Other,Grade A,2025-11-12,2025-11-20,5,0.5,721,20.0,0
+West Bengal,Jalpaiguri,Jalpaiguri Sadar,Tomato,Hybrid,FAQ,2026-01-16,2026-02-04,6,0.5,786,0.0,0
+West Bengal,Alipurduar,Falakata,Tomato,Hybrid,FAQ,2023-09-22,2026-08-28,4,0.4,497,0.0,0
+West Bengal,Howrah,Uluberia,Tomato,Other,Grade A,2025-11-11,2026-03-11,4,0.4,720,0.0,0
+West Bengal,Bankura,Khatra,Tomato,Tomato,Local,2026-02-19,2026-05-17,3,0.3,820,0.0,0
+West Bengal,Bankura,Khatra,Tomato,Local,Non-FAQ,2026-01-02,2026-04-05,2,0.2,772,0.0,0
+West Bengal,Bankura,Khatra,Tomato,Tomato,Medium,2025-11-13,2026-06-06,2,0.2,722,0.0,0
+West Bengal,Darjeeling,Siliguri,Tomato,Other,FAQ,2026-06-11,2026-07-18,2,0.2,932,0.0,0
+West Bengal,Medinipur(W),Medinipur(West),Tomato,Hybrid,FAQ,2023-01-05,2026-04-04,2,0.2,863,0.0,0
+West Bengal,Medinipur(W),Medinipur(West),Tomato,Other,FAQ,2026-03-06,2026-03-07,2,0.2,835,0.0,0
+West Bengal,Nadia,Chakdah,Tomato,Tomato,FAQ,2026-06-21,2026-06-22,2,0.2,942,0.0,0
+West Bengal,Puruliya,Kasipur,Tomato,Local,FAQ,2026-01-07,2026-01-11,2,0.2,777,0.0,0
+West Bengal,Alipurduar,Alipurduar,Tomato,Deshi,FAQ,2025-03-06,2025-03-06,1,0.1,625,0.0,0
+West Bengal,Alipurduar,Falakata,Tomato,Other,Non-FAQ,2025-01-29,2025-01-29,1,0.1,661,0.0,0
+West Bengal,Bankura,Khatra,Tomato,Local,FAQ,2025-05-04,2025-05-04,1,0.1,566,0.0,0
+West Bengal,Bankura,Khatra,Tomato,Other,Non-FAQ,2026-01-02,2026-01-02,1,0.1,772,0.0,0
+West Bengal,Birbhum,Birbhum,Tomato,Other,FAQ,2023-01-01,2024-04-30,1,0.1,935,0.0,0
+West Bengal,Coochbehar,Coochbehar,Tomato,Deshi,FAQ,2026-02-25,2026-02-25,1,0.1,826,0.0,0
+West Bengal,Hooghly,Kalipur,Tomato,Deshi,Grade B,2026-03-17,2026-03-17,1,0.1,846,0.0,0
+West Bengal,Howrah,Uluberia,Tomato,Other,Grade B,2025-11-12,2025-11-12,1,0.1,721,0.0,0
+West Bengal,Jalpaiguri,Moynaguri,Tomato,Tomato,FAQ,2023-01-04,2026-03-26,1,0.1,855,0.0,0
+West Bengal,Malda,Samsi,Tomato,Deshi,FAQ,2025-11-11,2025-11-11,1,0.1,720,0.0,0
+West Bengal,Medinipur(W),Ghatal,Tomato,Other,FAQ,2026-11-11,2026-11-11,1,0.1,1085,0.0,0
+West Bengal,Nadia,Chakdah,Tomato,Deshi,FAQ,2026-02-20,2026-02-20,1,0.1,821,0.0,0
+West Bengal,Purba Bardhaman,Kalna,Tomato,Tomato,Grade A,2026-06-17,2026-06-17,1,0.1,938,0.0,0
+West Bengal,Purba Bardhaman,Memari,Tomato,Tomato,Grade A,2026-05-05,2026-05-05,1,0.1,895,0.0,0
+West Bengal,Medinipur(W),Garbeta(Medinipur),Tomato,Hybrid,FAQ,2023-01-02,2023-10-12,0,0.0,1096,0.0,0
+West Bengal,Medinipur(W),Garbeta(Medinipur),Tomato,Other,FAQ,2023-11-01,2023-11-01,0,0.0,1096,0.0,0
+West Bengal,Medinipur(W),Ghatal,Tomato,Deshi,FAQ,2023-10-05,2023-10-10,0,0.0,1096,0.0,0

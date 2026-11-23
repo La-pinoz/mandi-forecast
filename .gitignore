@@ -1,0 +1,38 @@
+# Secrets (keep .env.example, which has no real values)
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Raw API responses (large, re-downloadable; selected files are copied into tests/fixtures later)
+data/
+
+# Personal learning notes and planning documents (kept locally, not published)
+/Milestone/
+/docs/M[0-9][0-9]-*.md
+/backfill_plan.md
+/03-mandi-blueprint*.md
+/CLAUDE.md
+
+# Claude Code local files
+.claude/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
