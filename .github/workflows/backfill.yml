@@ -1,0 +1,43 @@
+name: Backfill
+
+# Manual re-run of a range of arrival dates (Actions tab -> Backfill -> Run workflow). Safe to repeat:
+# responses already stored are skipped and unchanged prices add no vintages.
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "First arrival date, YYYY-MM-DD"
+        required: true
+      end:
+        description: "Last arrival date, YYYY-MM-DD"
+        required: true
+
+concurrency:
+  group: database-writes
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATA_GOV_IN_API_KEY: ${{ secrets.DATA_GOV_IN_API_KEY }}
+      # Inputs go through environment variables, never straight into the shell command, so a typed value
+      # can't run as shell code. argparse then rejects anything that isn't a date.
+      START_DATE: ${{ inputs.start }}
+      END_DATE: ${{ inputs.end }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies (exactly as locked)
+        run: uv sync --locked
+
+      - name: Backfill the date range
+        run: uv run python -m mandi.ingest.ogd backfill --start "$START_DATE" --end "$END_DATE"

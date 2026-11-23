@@ -14,6 +14,25 @@ def payload_hash(payload: dict) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def snapshot_already_stored(
+    conn: psycopg.Connection, source: str, request_params: dict, hash_value: str
+) -> bool:
+    """True if any run already stored this exact response (same source, request and payload hash).
+
+    The payload includes the dataset's `updated_date`, which changes once a day, so the same request on a
+    later day is stored again even when its records are unchanged: that is the evidence that we checked.
+    """
+    row = conn.execute(
+        """
+        SELECT 1 FROM raw_snapshots
+        WHERE source = %s AND request_params = %s AND payload_hash = %s
+        LIMIT 1
+        """,
+        (source, Jsonb(request_params), hash_value),
+    ).fetchone()
+    return row is not None
+
+
 def save_raw_snapshot(
     conn: psycopg.Connection,
     run_id: int,
@@ -24,8 +43,8 @@ def save_raw_snapshot(
 ) -> str:
     """Insert one response (not committed). Returns its payload hash.
 
-    `request_params` must not contain the API key. Saving the same payload twice in one run raises
-    UniqueViolation (primary key run_id + payload_hash).
+    `request_params` must not contain the API key. Saving the same request and payload twice in one run
+    raises UniqueViolation (primary key run_id + source + request_params + payload_hash, migration 009).
     """
     hash_value = payload_hash(payload)
     conn.execute(

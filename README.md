@@ -7,8 +7,9 @@ The plan is in `03-mandi-blueprint-v2.md`; milestone tasks are in `Milestone/`; 
 built, with the reasons, is in one document per milestone in `docs/`.
 
 **Status:** M01 (data experiment, go), M02 (repo, CI, database schema), M03 (history loaded into the
-database as price vintages) and M04 (validation: quarantine, anomaly flags, day status) done. No daily
-ingestion or modelling yet.
+database as price vintages) and M04 (validation: quarantine, anomaly flags, day status) done. M05 (daily
+ingest + 7-day recheck on GitHub Actions) built and run by hand; waiting for its first scheduled run. No
+modelling yet.
 
 ## Setup
 
@@ -30,7 +31,24 @@ uv run python -m mandi.store.migrate    # apply new SQL migrations to DATABASE_U
 uv run python -m mandi.ingest.load_m01_files   # load the saved M01 history files (re-running adds nothing)
 uv run python -m mandi.validate.replay         # re-validate every stored raw snapshot, then print the report
 uv run python -m mandi.validate.report         # print the data-quality report only
+uv run python -m mandi.ingest.ogd ingest        # fetch yesterday and today (IST) from data.gov.in
+uv run python -m mandi.ingest.ogd recheck       # fetch the 7 dates before those again (late rows, edits)
+uv run python -m mandi.ingest.ogd backfill --start 2026-11-01 --end 2026-11-07
 ```
+
+Re-running any of the three adds nothing that is already stored.
+
+## Scheduled jobs (GitHub Actions)
+
+| Workflow | When | What |
+|---|---|---|
+| `ci.yml` | every push / pull request | lint, format check, tests against a throwaway PostgreSQL 18 |
+| `daily.yml` | 07:17 IST daily (`47 1 * * *` UTC), or by hand | `ingest`, then `recheck` |
+| `backfill.yml` | by hand, with start and end dates | `backfill` for that range |
+
+`daily.yml` and `backfill.yml` need the repository secrets `DATABASE_URL` (Neon direct URL) and
+`DATA_GOV_IN_API_KEY`. They never run migrations; apply those by hand first. GitHub turns scheduled workflows
+off after 60 days without repository activity.
 
 Database tests run only when `TEST_DATABASE_URL` is set. Each test creates and drops its own temporary
 schema, so it never touches existing tables. In CI they run against a throwaway PostgreSQL 18 container

@@ -87,6 +87,32 @@ def test_raw_snapshots_are_append_only(schema_conn, statement):
         schema_conn.execute(statement)
 
 
+INSERT_EMPTY_SNAPSHOT = """
+INSERT INTO raw_snapshots (run_id, payload_hash, source, request_params, payload, ingested_at)
+VALUES (%(run_id)s, 'same-empty-body', %(source)s, %(request_params)s, '{"total": 0, "records": []}', now())
+"""
+
+
+def test_two_requests_with_identical_responses_in_one_run_are_both_kept(schema_conn):
+    # The first live run (M05): Tomato and Onion for today both came back empty with the same body.
+    run_id = new_run(schema_conn)
+    for commodity in ["Tomato", "Onion"]:
+        request_params = f'{{"filters[Commodity]": "{commodity}", "filters[Arrival_Date]": "23/11/2026"}}'
+        schema_conn.execute(
+            INSERT_EMPTY_SNAPSHOT, {"run_id": run_id, "source": SOURCE, "request_params": request_params}
+        )
+    assert schema_conn.execute("SELECT count(*) FROM raw_snapshots").fetchone()[0] == 2
+
+
+def test_same_request_and_response_twice_in_one_run_is_rejected(schema_conn):
+    run_id = new_run(schema_conn)
+    values = {"run_id": run_id, "source": SOURCE, "request_params": '{"filters[Commodity]": "Tomato"}'}
+    schema_conn.execute(INSERT_EMPTY_SNAPSHOT, values)
+
+    with pytest.raises(psycopg.errors.UniqueViolation):
+        schema_conn.execute(INSERT_EMPTY_SNAPSHOT, values)
+
+
 def test_unknown_day_status_is_rejected(schema_conn):
     series_id = schema_conn.execute(
         "INSERT INTO series (source, market, commodity, variety, grade, district)"

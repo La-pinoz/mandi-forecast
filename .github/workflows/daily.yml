@@ -1,0 +1,42 @@
+name: Daily
+
+# 01:47 UTC = 07:17 IST. In every saved M01 response the dataset was refreshed once a day at about
+# 05:05-05:12 IST (its updated_date field), so this leaves about 2 hours of margin. An odd minute,
+# because GitHub delays scheduled runs most at the top of the hour. See docs/M05-daily-ingest.md.
+on:
+  schedule:
+    - cron: "47 1 * * *"
+  workflow_dispatch:
+
+# One writer at a time: daily and backfill runs share this group, so two runs never compare against the
+# same "latest vintage" at once. A queued run waits instead of cancelling the running one.
+concurrency:
+  group: database-writes
+  cancel-in-progress: false
+
+jobs:
+  ingest-and-recheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATA_GOV_IN_API_KEY: ${{ secrets.DATA_GOV_IN_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies (exactly as locked)
+        run: uv sync --locked
+
+      - name: Ingest yesterday and today
+        run: uv run python -m mandi.ingest.ogd ingest
+
+      # Runs even if the ingest step failed (the two cover different dates); the workflow still ends red.
+      - name: Recheck the 7 dates before those
+        if: ${{ !cancelled() }}
+        run: uv run python -m mandi.ingest.ogd recheck
