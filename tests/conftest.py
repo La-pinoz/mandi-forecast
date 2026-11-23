@@ -20,6 +20,8 @@ import pytest
 from dotenv import load_dotenv
 from psycopg import sql
 
+from mandi.store.migrate import apply_migrations
+
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 
@@ -44,3 +46,10 @@ def db_conn() -> Iterator[psycopg.Connection]:
         conn.execute(sql.SQL("DROP SCHEMA {} CASCADE").format(schema))
         conn.commit()
         conn.close()
+
+
+@pytest.fixture
+def schema_conn(db_conn: psycopg.Connection) -> psycopg.Connection:
+    """`db_conn` with all project migrations applied: a fresh database holding the current schema."""
+    apply_migrations(db_conn)
+    return db_conn

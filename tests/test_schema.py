@@ -3,8 +3,6 @@
 import psycopg
 import pytest
 
-from mandi.store.migrate import apply_migrations
-
 SOURCE = "35985678-0d79-46b4-9ed6-6f13308a1d24"
 
 INSERT_VINTAGE = """
@@ -16,12 +14,6 @@ INSERT INTO price_vintages (
     %(min)s, %(max)s, %(modal)s, 'hash-1', '2026-11-22 21:00+05:30', %(run_id)s
 )
 """
-
-
-@pytest.fixture
-def schema_conn(db_conn):
-    apply_migrations(db_conn)
-    return db_conn
 
 
 def new_run(conn: psycopg.Connection) -> int:
