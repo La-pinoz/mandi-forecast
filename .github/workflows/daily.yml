@@ -26,6 +26,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Temporary diagnostic (2026-11-24): where does the runner connect from? data.gov.in does not answer
+      # GitHub's runners (docs/incidents.md). Remove once the question is settled.
+      - name: Check runner location
+        continue-on-error: true
+        run: curl -sS --max-time 20 https://ipinfo.io
+
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
