@@ -247,6 +247,9 @@ def ingest_dates(
         tracked = tracked_series_keys(conn)
         if not tracked:
             raise RuntimeError("No active series in `series`; load them first (M03).")
+        # End the SELECT's transaction before any API call. Otherwise the connection sits idle inside a
+        # transaction for minutes during retries, Neon ends the session, and the run can't be marked failed.
+        conn.commit()
         commodities = sorted({series_key[2] for series_key in tracked})
         for arrival_date in arrival_dates:
             for commodity in commodities:

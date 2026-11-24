@@ -191,6 +191,24 @@ def test_a_failed_fetch_marks_the_run_failed_and_keeps_earlier_responses(conn, m
     assert counts["prices_current"] == 0
 
 
+def test_no_transaction_is_left_open_while_waiting_for_the_api(conn, monkeypatch) -> None:
+    # Regression (2026-11-24): the first fetch waited ~2.5 min in retries inside the transaction opened by
+    # the series SELECT; Neon ended the idle-in-transaction session, so the run could not be marked failed.
+    use_saved_responses(monkeypatch, "first_fetch")
+    fetch_from_file = ogd.fetch_date
+    status_during_fetch = []
+
+    def record_status(commodity: str, arrival_date: date, api_key: str) -> ogd.FetchedSnapshot:
+        status_during_fetch.append(conn.info.transaction_status)
+        return fetch_from_file(commodity, arrival_date, api_key)
+
+    monkeypatch.setattr(ogd, "fetch_date", record_status)
+    ogd.ingest_dates(conn, "daily_ingest", [ARRIVAL_DATE], api_key="unused")
+
+    idle = psycopg.pq.TransactionStatus.IDLE
+    assert status_during_fetch == [idle, idle]
+
+
 def test_no_active_series_is_an_error(schema_conn, monkeypatch) -> None:
     use_saved_responses(monkeypatch, "first_fetch")
     with pytest.raises(RuntimeError, match="No active series"):

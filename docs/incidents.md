@@ -5,6 +5,24 @@ the source are not incidents by themselves; they are counted on the dashboard's 
 
 ---
 
+## 2026-11-24: no data or forecasts for 24/11; the API does not answer GitHub's runners
+
+**What happened.** The first GitHub Actions run of the Daily workflow (a manual run at 04:37 UTC) failed. Every
+request to data.gov.in got `Connection refused` or timed out. The same command worked from the owner's laptop in
+India. The likely cause is that data.gov.in blocks traffic from outside India or from cloud data centres
+(assumed, not confirmed). While the job waited through retries, Neon ended its idle database session
+(`IdleInTransactionSessionTimeout`), so the run could not be marked `failed`.
+
+**Impact.** No ingest, recheck, forecast or scores from GitHub on 24/11. The dashboard's Data health tab still showed
+the 23/11 runs as the latest, all succeeded, so the failure was visible only on GitHub.
+
+**What changed.** `ingest_dates` in `src/mandi/ingest/ogd.py` now commits right after reading the series, so no
+transaction is open during API calls and a failed fetch is recorded as a `failed` run. Regression test:
+`test_no_transaction_is_left_open_while_waiting_for_the_api`. **Still open:** where the daily job runs (the owner's
+decision); see `docs/M05-daily-ingest.md`, §5 item 6.
+
+---
+
 ## 2026-11-23: first live daily ingest failed (run 5)
 
 **What happened.** The first live `ingest` run stopped with `UniqueViolation` on `raw_snapshots`. Tomato and onion
