@@ -1,0 +1,34 @@
+name: Diagnose API access
+
+# Temporary (2026-11-24): why does api.data.gov.in not answer GitHub's runners (docs/incidents.md)?
+# No database and no Python: only the network. Run by hand; delete once the question is settled.
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Where is this runner?
+        run: curl -sS --max-time 20 https://ipinfo.io
+
+      # Control: if this fails too, the runner has no internet at all and the test below means nothing.
+      - name: "Control: another HTTPS site"
+        run: curl -sS -o /dev/null --max-time 20 -w "HTTP %{http_code} in %{time_total} s\n" https://www.google.com
+
+      # -v shows where it stops: "Trying 164.100.61.198:443" then a timeout or "Connection refused" means the
+      # connection itself is blocked, before any HTTP (so headers, User-Agent or page size can't matter).
+      - name: Open a connection to api.data.gov.in
+        continue-on-error: true
+        run: curl -v -o /dev/null --connect-timeout 20 --max-time 40 -w "HTTP %{http_code} in %{time_total} s\n" https://api.data.gov.in/
+
+      # The same request the ingest makes, for one row. GitHub masks the key in the log.
+      - name: One-row request like the ingest
+        continue-on-error: true
+        env:
+          DATA_GOV_IN_API_KEY: ${{ secrets.DATA_GOV_IN_API_KEY }}
+        run: >-
+          curl -sS -o /dev/null --connect-timeout 20 --max-time 60 -w "HTTP %{http_code} in %{time_total} s\n"
+          "https://api.data.gov.in/resource/35985678-0d79-46b4-9ed6-6f13308a1d24?api-key=${DATA_GOV_IN_API_KEY}&format=json&limit=1"
